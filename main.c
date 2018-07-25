@@ -27,21 +27,56 @@ void wait_1ms(uint16_t u16Factor) // using timer 4
 	TIM4->CR1 = 0x0000;
 }
 
+void usartInit()
+{
+    //enable gpio clock
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
+    RCC->APB2ENR |= RCC_APB2ENR_AFIOEN;
+    GPIOA->CRH &= ~GPIO_CRH_CNF9 & ~GPIO_CRH_MODE9;
+    GPIOA->CRH |= GPIO_CRH_CNF9_1 | GPIO_CRH_MODE9_0;
+    
+    //enable usart clock
+    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
+    //reset registers
+    USART1->CR1 = 0;
+    USART1->CR2 = 0;
+    USART1->CR3 = 0;
+    //enable UE bit in CR1
+    USART1->CR1 |= USART_CR1_UE;
+    //(DMA)
+    
+    //set baudrate in BRR
+    USART1->BRR = 0x271; //mantissa: 0x27 (->39) fraction: 0x1 (->0.0625)
+    //set TE bit in CR1 (->idle frame)
+    USART1->CR1 |= USART_CR1_TE;
+    
+}
+
+
+
 int main(void)
 {
+    uint8_t u8counter = 0;
+    
     SystemInit();
     
-    RCC->APB2ENR = RCC_APB2ENR_IOPCEN;
+    RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 	
 	GPIOC->CRH = GPIO_CRH_MODE13_0;
     GPIOC->ODR = 0;
     
+    usartInit();
+    wait_1ms(1000);
+    
+    
 
     while(1)
     {
+        USART1->DR = u8counter++;
+        //USART1->CR1 |= USART_CR1_SBK;
         GPIOC->ODR = 0;
-        wait_1ms(1000);
+        wait_1ms(100);
         GPIOC->ODR = GPIO_ODR_ODR13;
-        wait_1ms(1000);
+        wait_1ms(900);
     }
 }
