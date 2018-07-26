@@ -27,8 +27,14 @@ void wait_1ms(uint16_t u16Factor) // using timer 4
 	TIM4->CR1 = 0x0000;
 }
 
-void usartInit()
+void usartSendByte(uint8_t u8data)
 {
+    while(!(USART1->SR & USART_SR_TXE));
+    USART1->DR = u8data;
+}
+
+void usartInit(uint32_t u32baudrate)
+{ 
     //enable gpio clock
     RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
     RCC->APB2ENR |= RCC_APB2ENR_AFIOEN;
@@ -46,10 +52,49 @@ void usartInit()
     //(DMA)
     
     //set baudrate in BRR
-    USART1->BRR = 0x271; //mantissa: 0x27 (->39) fraction: 0x1 (->0.0625)
+    USART1->BRR = SystemCoreClock/u32baudrate; //mantissa: 0x27 (->39) fraction: 0x1 (->0.0625)
     //set TE bit in CR1 (->idle frame)
     USART1->CR1 |= USART_CR1_TE;
+    USART1->CR1 |= USART_CR1_RE;
+}
+
+void usartClearFlagsAndBuffer(void)
+{
+    volatile uint8_t u8dummy;
     
+    u8dummy = USART1->SR; //clear flags
+    u8dummy = USART1->DR;
+}
+
+uint8_t usartDataAvailable(void)
+{
+    uint32_t u32temp;
+    volatile uint8_t u8dummy;
+    
+    u32temp = USART1->SR;
+    
+    if(u32temp & USART_SR_RXNE)
+    {
+        if(u32temp & 0x0000000F) //any error has occurred
+        {
+            u8dummy = USART1->SR;
+            u8dummy = USART1->DR;
+            return 2;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+uint8_t usartGetByte(void)
+{
+    return USART1->DR;
 }
 
 
@@ -57,22 +102,36 @@ void usartInit()
 int main(void)
 {
     uint8_t u8counter = 0;
+    uint8_t u8data;
     
     SystemInit();
     
     RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 	
 	GPIOC->CRH = GPIO_CRH_MODE13_0;
-    GPIOC->ODR = 0;
+    GPIOC->ODR |= GPIO_ODR_ODR13;
     
-    usartInit();
-    wait_1ms(1000);
+    usartInit(115200);
+    wait_1ms(10);
+    usartClearFlagsAndBuffer();
+    wait_1ms(100);
     
+    usartSendByte(0x3A);
+    
+    while(1)
+    {
+        if(usartDataAvailable() == 1)
+        {
+            u8data = usartGetByte();
+            usartSendByte(u8data);
+        }
+        wait_1ms(100);
+    }
     
 
     while(1)
     {
-        USART1->DR = u8counter++;
+        usartSendByte(u8counter++);
         //USART1->CR1 |= USART_CR1_SBK;
         GPIOC->ODR = 0;
         wait_1ms(100);
