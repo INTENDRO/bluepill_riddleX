@@ -1,5 +1,8 @@
 #include <stm32f10x.h>
 
+
+uint8_t au8usartData[10] = {0,1,2,3,4,5,6,7,8,9};
+
 void wait_1ms(uint16_t u16Factor) // using timer 4
 {
 	uint16_t i;
@@ -49,13 +52,36 @@ void usartInit(uint32_t u32baudrate)
     USART1->CR3 = 0;
     //enable UE bit in CR1
     USART1->CR1 |= USART_CR1_UE;
-    //(DMA)
-    
+    //DMA
+    USART1->CR3 |= USART_CR3_DMAT;
     //set baudrate in BRR
     USART1->BRR = SystemCoreClock/u32baudrate; //mantissa: 0x27 (->39) fraction: 0x1 (->0.0625)
     //set TE bit in CR1 (->idle frame)
     USART1->CR1 |= USART_CR1_TE;
     USART1->CR1 |= USART_CR1_RE;
+}
+
+void usartDMASend(void)
+{
+    RCC->AHBENR |= RCC_AHBENR_DMA1EN;
+    
+    DMA1_Channel4->CPAR = 0x40013800;
+    DMA1_Channel4->CMAR = (uint32_t)(&au8usartData[0]);
+    DMA1_Channel4->CCR = 0;
+    DMA1_Channel4->CCR |= DMA_CCR4_MINC; //NECESSARY?
+    DMA1_Channel4->CCR |= DMA_CCR4_DIR;
+    DMA1_Channel4->CCR |= DMA_CCR4_HTIE;
+    DMA1_Channel4->CCR |= DMA_CCR4_TCIE;
+    DMA1->IFCR = DMA_IFCR_CGIF4;
+    DMA1_Channel4->CNDTR = 3;
+    USART1->SR &= ~USART_SR_TC; //clear bit TC by writing 0 (other must not be affected! ->1)
+    
+    
+    NVIC_ClearPendingIRQ(DMA1_Channel4_IRQn);
+	NVIC_EnableIRQ(DMA1_Channel4_IRQn);
+    
+    DMA1_Channel4->CCR |= DMA_CCR4_EN;
+    
 }
 
 void usartClearFlagsAndBuffer(void)
@@ -115,6 +141,15 @@ int main(void)
     wait_1ms(10);
     usartClearFlagsAndBuffer();
     wait_1ms(100);
+    
+    __enable_irq();
+    
+    while(1)
+    {
+        usartDMASend();
+        wait_1ms(100);
+    }
+    
     
     usartSendByte(0x3A);
     
