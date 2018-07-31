@@ -2,6 +2,8 @@
 
 
 uint8_t au8usartData[10] = {0,1,2,3,4,5,6,7,8,9};
+uint8_t u8usartDataReady = 0;
+uint8_t u8usartData = 0;
 
 void wait_1ms(uint16_t u16Factor) // using timer 4
 {
@@ -52,6 +54,7 @@ void usartInit(uint32_t u32baudrate)
     USART1->CR3 = 0;
     //enable UE bit in CR1
     USART1->CR1 |= USART_CR1_UE;
+    USART1->CR1 |= USART_CR1_RXNEIE;
     //DMA
     USART1->CR3 |= USART_CR3_DMAT;
     //set baudrate in BRR
@@ -59,29 +62,25 @@ void usartInit(uint32_t u32baudrate)
     //set TE bit in CR1 (->idle frame)
     USART1->CR1 |= USART_CR1_TE;
     USART1->CR1 |= USART_CR1_RE;
+    
+    NVIC_ClearPendingIRQ(USART1_IRQn);
+	NVIC_EnableIRQ(USART1_IRQn);
 }
 
-void usartDMASend(void)
+void usartDMASend(uint8_t* u32data_ptr, uint16_t u16length)
 {
     RCC->AHBENR |= RCC_AHBENR_DMA1EN;
     
-    DMA1_Channel4->CPAR = 0x40013800;
-    DMA1_Channel4->CMAR = (uint32_t)(&au8usartData[0]);
+    DMA1_Channel4->CPAR = 0x40013804;
+    DMA1_Channel4->CMAR = (uint32_t)u32data_ptr;
     DMA1_Channel4->CCR = 0;
-    DMA1_Channel4->CCR |= DMA_CCR4_MINC; //NECESSARY?
+    DMA1_Channel4->CCR |= DMA_CCR4_MINC;
     DMA1_Channel4->CCR |= DMA_CCR4_DIR;
-    DMA1_Channel4->CCR |= DMA_CCR4_HTIE;
-    DMA1_Channel4->CCR |= DMA_CCR4_TCIE;
     DMA1->IFCR = DMA_IFCR_CGIF4;
-    DMA1_Channel4->CNDTR = 3;
+    DMA1_Channel4->CNDTR = (uint32_t)u16length;
     USART1->SR &= ~USART_SR_TC; //clear bit TC by writing 0 (other must not be affected! ->1)
     
-    
-    NVIC_ClearPendingIRQ(DMA1_Channel4_IRQn);
-	NVIC_EnableIRQ(DMA1_Channel4_IRQn);
-    
     DMA1_Channel4->CCR |= DMA_CCR4_EN;
-    
 }
 
 void usartClearFlagsAndBuffer(void)
@@ -120,9 +119,24 @@ uint8_t usartDataAvailable(void)
 
 uint8_t usartGetByte(void)
 {
-    return USART1->DR;
+    return (uint8_t)USART1->DR;
 }
 
+
+void USART1_IRQHandler(void)
+{
+    volatile uint32_t u32temp;
+    u32temp = USART1->SR;
+    if(u32temp & 0x0000000F)
+    {
+        u32temp = USART1->DR;
+    }
+    else
+    {
+        u8usartData = USART1->DR;
+        u8usartDataReady = 1;
+    }
+}
 
 
 int main(void)
@@ -146,8 +160,25 @@ int main(void)
     
     while(1)
     {
-        usartDMASend();
-        wait_1ms(100);
+        if(u8usartDataReady)
+        {
+            u8usartDataReady = 0;
+            usartSendByte(u8usartData);
+        }
+    }
+    
+    while(1)
+    {
+        usartSendByte(0x3A);
+        wait_1ms(1000);
+    }
+    
+    while(1)
+    {
+        usartDMASend(&au8usartData[0],4);
+        wait_1ms(500);
+        usartSendByte(0x3A);
+        wait_1ms(500);
     }
     
     
