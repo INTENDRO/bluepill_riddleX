@@ -1,9 +1,12 @@
 #include <stm32f10x.h>
+#include <string.h>
 
 
-uint8_t au8usartData[10] = {0,1,2,3,4,5,6,7,8,9};
+uint8_t au8usartData[80];
+uint8_t au8data[80];
 uint8_t u8usartDataReady = 0;
 uint8_t u8usartData = 0;
+uint8_t au8temp[80];
 
 void wait_1ms(uint16_t u16Factor) // using timer 4
 {
@@ -138,6 +141,79 @@ void USART1_IRQHandler(void)
     }
 }
 
+uint8_t crc8(uint8_t* u8data_ptr, uint8_t u8length)
+{
+	uint8_t u8crc,i,j,u8temp,u8inByte;
+
+	u8crc = 0;
+
+	for(i=0;i<u8length;i++)
+	{
+		u8inByte = u8data_ptr[i];
+		for(j=0;j<8;j++)
+		{
+			u8temp = (u8crc^u8inByte)&0x80;
+			u8crc <<= 1;
+			if(u8temp!=0)
+			{
+				u8crc ^= 0x07;
+			}
+			u8inByte<<=1;
+		}
+	}
+
+	return u8crc;
+}
+
+
+void usart_prot_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
+{
+    uint16_t u16dataBitCounter,u16destBitCounter,u16dataMaxBit,u16consecutiveOnes,i;
+    
+    
+    au8temp[0] = ((u8dataType&0x03)<<6) | (u8length&0x3F);
+    memcpy(&au8temp[1],u8dataToSend_ptr,u8length);
+    au8temp[u8length+1] = crc8(&au8temp[0],u8length+1);
+    
+    au8usartData[0] = 0x7E; //delimiter
+    
+    u16dataBitCounter = 0;
+    u16destBitCounter = 0;
+    u16consecutiveOnes = 0;
+    u16dataMaxBit = (((uint16_t)u8length)+2)*8;
+    
+    while(u16dataBitCounter < u16dataMaxBit)
+    {
+        if(au8temp[u16dataBitCounter/8] & (0x80>>(u16dataBitCounter%8))) //data is a 1
+        {
+            u16consecutiveOnes++;
+            if(u16consecutiveOnes==6)
+            {
+                u16consecutiveOnes = 0;
+                au8usartData[(u16destBitCounter/8)+1] &= ~(0x80 >> (u16destBitCounter%8)); //stuff bit
+                u16destBitCounter++;
+            }
+            au8usartData[(u16destBitCounter/8)+1] |= (0x80 >> (u16destBitCounter%8)); //set dest bit
+        }
+        else //data is a 0
+        {
+            u16consecutiveOnes = 0;
+            au8usartData[(u16destBitCounter/8)+1] &= ~(0x80 >> (u16destBitCounter%8)); //clear dest bit
+        }
+        u16dataBitCounter++;
+        u16destBitCounter++;
+    }
+    
+    for(i=0;i<((8-(u16destBitCounter%8))%8);i++)
+    {
+        au8usartData[(u16destBitCounter/8)+1] &= ~(0x80 >> (u16destBitCounter%8)); //clear dest bit
+    }
+    
+    au8usartData[u16destBitCounter/8+2] = 0x7E; //delimiter
+    
+    usartDMASend(&au8usartData[0],u16destBitCounter/8+3);
+}
+
 
 int main(void)
 {
@@ -156,9 +232,26 @@ int main(void)
     usartClearFlagsAndBuffer();
     wait_1ms(100);
     
-    __enable_irq();
+    //__enable_irq();
+    
+    au8data[0] = 0xFF;
+    au8data[1] = 0x7E;
+    au8data[2] = 0x80;
+    au8data[3] = 0x3F;
+    
     
     while(1)
+    {
+        usart_prot_send(&au8data[0],0,4);
+        wait_1ms(1000);
+    }
+    
+    
+}
+
+
+/*
+while(1)
     {
         if(u8usartDataReady)
         {
@@ -204,4 +297,4 @@ int main(void)
         GPIOC->ODR = GPIO_ODR_ODR13;
         wait_1ms(900);
     }
-}
+*/
