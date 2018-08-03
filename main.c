@@ -165,15 +165,25 @@ uint8_t crc8(uint8_t* u8data_ptr, uint8_t u8length)
 	return u8crc;
 }
 
+void usart_prot_get_packet(uint8_t* u8packet_ptr, uint8_t* u8rawData_ptr, uint8_t u8length, uint8_t u8dataType)
+{
+    *u8packet_ptr = ((u8dataType&0x03)<<6) | (u8length&0x3F);
+    memcpy(u8packet_ptr+1,u8rawData_ptr,u8length);
+    *(u8packet_ptr+u8length+1) = crc8(u8packet_ptr,u8length+1);
+}
+
+void usart_prot_stuff(uint8_t* u8stuffed_ptr, uint8_t u8stuffedLength, uint8_t* u8data_ptr, uint8_t u8dataLength)
+{
+    
+}
+
 
 void usart_prot_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
 {
     uint16_t u16dataBitCounter,u16destBitCounter,u16dataMaxBit,u16consecutiveOnes,i;
     
+    usart_prot_get_packet(&au8temp[0],u8dataToSend_ptr,u8length,u8dataType);
     
-    au8temp[0] = ((u8dataType&0x03)<<6) | (u8length&0x3F);
-    memcpy(&au8temp[1],u8dataToSend_ptr,u8length);
-    au8temp[u8length+1] = crc8(&au8temp[0],u8length+1);
     
     au8usartData[0] = 0x7E; //delimiter
     
@@ -186,22 +196,26 @@ void usart_prot_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8leng
     {
         if(au8temp[u16dataBitCounter/8] & (0x80>>(u16dataBitCounter%8))) //data is a 1
         {
+            au8usartData[(u16destBitCounter/8)+1] |= (0x80 >> (u16destBitCounter%8)); //set dest bit
+            u16destBitCounter++;
+            
             u16consecutiveOnes++;
-            if(u16consecutiveOnes==6)
+            if(u16consecutiveOnes==5)
             {
                 u16consecutiveOnes = 0;
                 au8usartData[(u16destBitCounter/8)+1] &= ~(0x80 >> (u16destBitCounter%8)); //stuff bit
                 u16destBitCounter++;
             }
-            au8usartData[(u16destBitCounter/8)+1] |= (0x80 >> (u16destBitCounter%8)); //set dest bit
+            
         }
         else //data is a 0
         {
             u16consecutiveOnes = 0;
             au8usartData[(u16destBitCounter/8)+1] &= ~(0x80 >> (u16destBitCounter%8)); //clear dest bit
+            u16destBitCounter++;
         }
         u16dataBitCounter++;
-        u16destBitCounter++;
+        
     }
     
     for(i=0;i<((8-(u16destBitCounter%8))%8);i++)
@@ -234,18 +248,27 @@ int main(void)
     
     //__enable_irq();
     
+    au8data[0] = 0x7D;
+    au8data[1] = 0xBF;
+    
+    while(1)
+    {
+        usart_prot_send(&au8data[0],0,2);
+        wait_1ms(1000);
+    }
+    
+    /*
     au8data[0] = 0xFF;
     au8data[1] = 0x7E;
     au8data[2] = 0x80;
     au8data[3] = 0x3F;
-    
     
     while(1)
     {
         usart_prot_send(&au8data[0],0,4);
         wait_1ms(1000);
     }
-    
+    */
     
 }
 
