@@ -172,7 +172,58 @@ void usart_prot_get_packet(uint8_t* u8packet_ptr, uint8_t* u8rawData_ptr, uint8_
     *(u8packet_ptr+u8length+1) = crc8(u8packet_ptr,u8length+1);
 }
 
-void usart_prot_stuff(uint8_t* u8stuffed_ptr, uint8_t u8stuffedLength, uint8_t* u8data_ptr, uint8_t u8dataLength)
+uint8_t usart_prot_stuff(uint8_t* u8stuffed_ptr, uint8_t* u8data_ptr, uint8_t u8dataLength)
+{
+    uint16_t u16dataBitCounter,u16destBitCounter,u16dataMaxBit,u16consecutiveOnes;
+    
+    u8stuffed_ptr[0] = 0x7E; //delimiter
+    
+    u16dataBitCounter = 0;
+    u16destBitCounter = 0;
+    u16consecutiveOnes = 0;
+    u16dataMaxBit = ((uint16_t)u8dataLength)*8;
+    
+    while(u16dataBitCounter < u16dataMaxBit)
+    {
+        if(u8data_ptr[u16dataBitCounter/8] & (0x80>>(u16dataBitCounter%8))) //data is a 1
+        {
+            u8stuffed_ptr[(u16destBitCounter/8)+1] |= (0x80 >> (u16destBitCounter%8)); //set dest bit
+            u16destBitCounter++;
+            
+            u16consecutiveOnes++;
+            if(u16consecutiveOnes==5)
+            {
+                u16consecutiveOnes = 0;
+                u8stuffed_ptr[(u16destBitCounter/8)+1] &= ~(0x80 >> (u16destBitCounter%8)); //stuff bit
+                u16destBitCounter++;
+            }
+        }
+        else //data is a 0
+        {
+            u16consecutiveOnes = 0;
+            u8stuffed_ptr[(u16destBitCounter/8)+1] &= ~(0x80 >> (u16destBitCounter%8)); //clear dest bit
+            u16destBitCounter++;
+        }
+        u16dataBitCounter++;
+        
+    }
+    
+    while((u16destBitCounter%8)!=0)
+    {
+        u8stuffed_ptr[(u16destBitCounter/8)+1] &= ~(0x80 >> (u16destBitCounter%8)); //clear dest bit
+        u16destBitCounter++;
+    }
+    
+    u8stuffed_ptr[u16destBitCounter/8+1] = 0x7E; //delimiter
+    return u16destBitCounter/8+2; //return stuffed length
+}
+
+void usart_prot_unstuff(uint8_t* u8unStuffed_ptr, uint8_t* u8data_ptr, uint8_t u8dataLength)
+{
+    
+}
+
+void usart_prot_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLength, uint8_t* u8package_ptr, uint8_t u8packageLength)
 {
     
 }
@@ -180,52 +231,18 @@ void usart_prot_stuff(uint8_t* u8stuffed_ptr, uint8_t u8stuffedLength, uint8_t* 
 
 void usart_prot_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
 {
-    uint16_t u16dataBitCounter,u16destBitCounter,u16dataMaxBit,u16consecutiveOnes,i;
+    uint8_t u8stuffedLength;
     
     usart_prot_get_packet(&au8temp[0],u8dataToSend_ptr,u8length,u8dataType);
+    //usartDMASend(&au8temp[0],u8length+2);
     
+    u8stuffedLength = usart_prot_stuff(&au8usartData[0],&au8temp[0],u8length+2);
+    usartDMASend(&au8usartData[0],u8stuffedLength);
+}
+
+void usart_prot_receive(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLength, uint8_t* u8rawData_ptr, uint8_t u8rawDataLength)
+{
     
-    au8usartData[0] = 0x7E; //delimiter
-    
-    u16dataBitCounter = 0;
-    u16destBitCounter = 0;
-    u16consecutiveOnes = 0;
-    u16dataMaxBit = (((uint16_t)u8length)+2)*8;
-    
-    while(u16dataBitCounter < u16dataMaxBit)
-    {
-        if(au8temp[u16dataBitCounter/8] & (0x80>>(u16dataBitCounter%8))) //data is a 1
-        {
-            au8usartData[(u16destBitCounter/8)+1] |= (0x80 >> (u16destBitCounter%8)); //set dest bit
-            u16destBitCounter++;
-            
-            u16consecutiveOnes++;
-            if(u16consecutiveOnes==5)
-            {
-                u16consecutiveOnes = 0;
-                au8usartData[(u16destBitCounter/8)+1] &= ~(0x80 >> (u16destBitCounter%8)); //stuff bit
-                u16destBitCounter++;
-            }
-            
-        }
-        else //data is a 0
-        {
-            u16consecutiveOnes = 0;
-            au8usartData[(u16destBitCounter/8)+1] &= ~(0x80 >> (u16destBitCounter%8)); //clear dest bit
-            u16destBitCounter++;
-        }
-        u16dataBitCounter++;
-        
-    }
-    
-    for(i=0;i<((8-(u16destBitCounter%8))%8);i++)
-    {
-        au8usartData[(u16destBitCounter/8)+1] &= ~(0x80 >> (u16destBitCounter%8)); //clear dest bit
-    }
-    
-    au8usartData[u16destBitCounter/8+2] = 0x7E; //delimiter
-    
-    usartDMASend(&au8usartData[0],u16destBitCounter/8+3);
 }
 
 
@@ -248,16 +265,16 @@ int main(void)
     
     //__enable_irq();
     
-    au8data[0] = 0x7D;
-    au8data[1] = 0xBF;
+//    au8data[0] = 0x7D;
+//    au8data[1] = 0xBF;
+//    
+//    while(1)
+//    {
+//        usart_prot_send(&au8data[0],0,2);
+//        wait_1ms(1000);
+//    }
     
-    while(1)
-    {
-        usart_prot_send(&au8data[0],0,2);
-        wait_1ms(1000);
-    }
     
-    /*
     au8data[0] = 0xFF;
     au8data[1] = 0x7E;
     au8data[2] = 0x80;
@@ -268,7 +285,7 @@ int main(void)
         usart_prot_send(&au8data[0],0,4);
         wait_1ms(1000);
     }
-    */
+    
     
 }
 
