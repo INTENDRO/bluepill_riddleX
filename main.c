@@ -218,26 +218,90 @@ uint8_t usart_prot_stuff(uint8_t* u8stuffed_ptr, uint8_t* u8data_ptr, uint8_t u8
     return u16destBitCounter/8+2; //return stuffed length
 }
 
-void usart_prot_unstuff(uint8_t* u8unStuffed_ptr, uint8_t* u8data_ptr, uint8_t u8dataLength)
+int8_t usart_prot_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u8stuffedLength)
 {
+    uint16_t u16consecutiveOnes, u16dataBitCounter, u16stuffedBitCounter, u16stuffedBitMax, u16stuffBitCount;
     
+    u16consecutiveOnes = 0;
+    u16dataBitCounter = 0;
+    u16stuffedBitCounter = 0;
+    u16stuffBitCount = 0;
+    u16stuffedBitMax = (uint16_t)u8stuffedLength*8;
+    
+    while(u16stuffedBitCounter<u16stuffedBitMax)
+    {
+        if(u8stuffed_ptr[u16stuffedBitCounter/8] & (0x80 >> (u16stuffedBitCounter%8))) //stuffed bitstream is 1
+        {
+            u8data_ptr[u16dataBitCounter/8] |= (0x80 >> (u16dataBitCounter%8)); //set data bit to 1
+            u16dataBitCounter++;
+            u16stuffedBitCounter++;
+            
+            u16consecutiveOnes++;
+            if(u16consecutiveOnes==5)
+            {
+                u16consecutiveOnes = 0;
+                //should be a stuff bit -> 0
+                if(u8stuffed_ptr[u16stuffedBitCounter/8] & (0x80 >> (u16stuffedBitCounter%8)))
+                {
+                    //error
+                    return -1;
+                }
+                u16stuffedBitCounter++;
+                u16stuffBitCount++;
+            }
+        }
+        else //stuffed bitstream is 0
+        {
+            u16consecutiveOnes = 0;
+            u8data_ptr[u16dataBitCounter/8] &= ~(0x80 >> (u16dataBitCounter%8)); //set data bit to 0
+            u16dataBitCounter++;
+            u16stuffedBitCounter++;
+        }
+    }
+    return (int8_t)(u8stuffedLength - (u16stuffBitCount/8 +1));
 }
 
-void usart_prot_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLength, uint8_t* u8package_ptr, uint8_t u8packageLength)
+int8_t usart_prot_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLength, uint8_t* u8package_ptr, uint8_t u8packageLength)
 {
+    if(crc8(u8package_ptr,u8packageLength) != 0)
+    {
+        return -1;
+    }
     
+    if(((u8package_ptr[0]&0x3F)+2) != u8packageLength)
+    {
+        return -2;
+    }
+    *u8dataType = (u8package_ptr[0]>>6)&0x03;
+    
+    memcpy(u8data_ptr,u8package_ptr+1,u8packageLength-2);
+    
+    return 0;
 }
 
 
 void usart_prot_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
 {
     uint8_t u8stuffedLength;
+    uint8_t u8unstuffedLength; //debug
+    uint8_t u8returnDataType; //debug
+    uint8_t u8returnDataLength;//debug
+    int8_t s8returnVal; //debug
     
     usart_prot_get_packet(&au8temp[0],u8dataToSend_ptr,u8length,u8dataType);
     //usartDMASend(&au8temp[0],u8length+2);
     
     u8stuffedLength = usart_prot_stuff(&au8usartData[0],&au8temp[0],u8length+2);
-    usartDMASend(&au8usartData[0],u8stuffedLength);
+    //usartDMASend(&au8usartData[0],u8stuffedLength);
+    
+    //---------------------------------------------------------------------------
+    
+    u8unstuffedLength = usart_prot_unstuff(&au8temp[0],&au8usartData[1],u8stuffedLength-2);
+    //usartDMASend(&au8temp[0],u8unstuffedLength);
+    
+    s8returnVal = usart_prot_unpackage(&au8usartData[0],&u8returnDataType,&u8returnDataLength,&au8temp[0],u8unstuffedLength);
+    
+    usartDMASend(&s8returnVal,1);
 }
 
 void usart_prot_receive(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLength, uint8_t* u8rawData_ptr, uint8_t u8rawDataLength)

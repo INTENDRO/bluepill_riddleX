@@ -30,14 +30,16 @@ Rebuild target 'Target 1'
 assembling startup_stm32f10x_md.s...
 compiling system_stm32f10x.c...
 compiling main.c...
-main.c(251): warning:  #177-D: variable "u8counter"  was declared but never referenced
+main.c(304): warning:  #167-D: argument of type "int8_t *" is incompatible with parameter of type "uint8_t *"
+      usartDMASend(&s8returnVal,1);
+main.c(315): warning:  #177-D: variable "u8counter"  was declared but never referenced
       uint8_t u8counter = 0;
-main.c(252): warning:  #177-D: variable "u8data"  was declared but never referenced
+main.c(316): warning:  #177-D: variable "u8data"  was declared but never referenced
       uint8_t u8data;
-main.c: 2 warnings, 0 errors
+main.c: 3 warnings, 0 errors
 linking...
-Program Size: Code=2220 RO-data=268 RW-data=24 ZI-data=1872  
-".\Objects\bluepill_riddleX.axf" - 0 Error(s), 2 Warning(s).
+Program Size: Code=2660 RO-data=268 RW-data=24 ZI-data=1872  
+".\Objects\bluepill_riddleX.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -62,13 +64,13 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: Keil::Device:Startup:1.0.0
-      Include file:  RTE_Driver\Config\RTE_Device.h
-      Source file:   Device\Source\system_stm32f10x.c
       Source file:   Device\Source\ARM\STM32F1xx_OPT.s
+      Source file:   Device\Source\system_stm32f10x.c
       Source file:   Device\Source\ARM\startup_stm32f10x_md.s
+      Include file:  RTE_Driver\Config\RTE_Device.h
 
    * Component: ARM::CMSIS:CORE:5.1.1
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>
