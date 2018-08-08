@@ -2,11 +2,12 @@
 #include <string.h>
 
 
-uint8_t au8usartData[80];
+uint8_t au8usartSendData[80];
+uint8_t au8usartReceiveData[80];
 uint8_t au8data[80];
 uint8_t u8usartDataReady = 0;
 uint8_t u8usartData = 0;
-uint8_t au8temp[80];
+//uint8_t au8temp[80];
 
 void wait_1ms(uint16_t u16Factor) // using timer 4
 {
@@ -222,6 +223,27 @@ int8_t usart_prot_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u
 {
     uint16_t u16consecutiveOnes, u16dataBitCounter, u16stuffedBitCounter, u16stuffedBitMax, u16stuffBitCount;
     
+    if(u8stuffed_ptr[0]==0x7E)
+    {
+        u8stuffed_ptr++;
+        u8stuffedLength--;
+        
+        if(u8stuffedLength == 0)
+        {
+            return -2;
+        }
+    }
+    
+    if(u8stuffed_ptr[u8stuffedLength-1] == 0x7E)
+    {
+        u8stuffedLength--;
+        
+        if(u8stuffedLength == 0)
+        {
+            return -2;
+        }
+    }
+    
     u16consecutiveOnes = 0;
     u16dataBitCounter = 0;
     u16stuffedBitCounter = 0;
@@ -261,7 +283,7 @@ int8_t usart_prot_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u
     return (int8_t)(u8stuffedLength - (u16stuffBitCount/8 +1));
 }
 
-int8_t usart_prot_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLength, uint8_t* u8package_ptr, uint8_t u8packageLength)
+int8_t usart_prot_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataLength, uint8_t* u8dataType, uint8_t* u8package_ptr, uint8_t u8packageLength)
 {
     if(crc8(u8package_ptr,u8packageLength) != 0)
     {
@@ -273,6 +295,7 @@ int8_t usart_prot_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u
         return -2;
     }
     *u8dataType = (u8package_ptr[0]>>6)&0x03;
+    *u8dataLength = u8packageLength-2;
     
     memcpy(u8data_ptr,u8package_ptr+1,u8packageLength-2);
     
@@ -283,37 +306,54 @@ int8_t usart_prot_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u
 void usart_prot_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
 {
     uint8_t u8stuffedLength;
+    uint8_t au8temp[80];
+    
     uint8_t u8unstuffedLength; //debug
     uint8_t u8returnDataType; //debug
     uint8_t u8returnDataLength;//debug
     int8_t s8returnVal; //debug
     
     usart_prot_get_packet(&au8temp[0],u8dataToSend_ptr,u8length,u8dataType);
-    //usartDMASend(&au8temp[0],u8length+2);
     
-    u8stuffedLength = usart_prot_stuff(&au8usartData[0],&au8temp[0],u8length+2);
-    //usartDMASend(&au8usartData[0],u8stuffedLength);
+    u8stuffedLength = usart_prot_stuff(&au8usartSendData[0],&au8temp[0],u8length+2);
+    usartDMASend(&au8usartSendData[0],u8stuffedLength);
     
     //---------------------------------------------------------------------------
     
-    u8unstuffedLength = usart_prot_unstuff(&au8temp[0],&au8usartData[1],u8stuffedLength-2);
+    //u8unstuffedLength = usart_prot_unstuff(&au8temp[0],&au8usartSendData[0],u8stuffedLength);
     //usartDMASend(&au8temp[0],u8unstuffedLength);
     
-    s8returnVal = usart_prot_unpackage(&au8usartData[0],&u8returnDataType,&u8returnDataLength,&au8temp[0],u8unstuffedLength);
+    //s8returnVal = usart_prot_unpackage(&au8usartSendData[0],&u8returnDataLength,&u8returnDataType,&au8temp[0],u8unstuffedLength);
     
-    usartDMASend(&s8returnVal,1);
+    //usartDMASend(&s8returnVal,1);
 }
 
-void usart_prot_receive(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLength, uint8_t* u8rawData_ptr, uint8_t u8rawDataLength)
+int8_t usart_prot_receive(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLength, uint8_t* u8rawData_ptr, uint8_t u8rawDataLength)
 {
+    int8_t s8unstuffedLength,s8retVal;
     
+    uint8_t au8temp[80];
+    
+    s8unstuffedLength = usart_prot_unstuff(&au8temp[0],u8rawData_ptr,u8rawDataLength);
+    if(s8unstuffedLength < 2) //minimum length: 2 (opcode and crc). also: negative numbers are also errors
+    {
+        return -1;
+    }
+    
+    s8retVal = usart_prot_unpackage(u8data_ptr,u8dataLength,u8dataType,&au8temp[0],(uint8_t)s8unstuffedLength);
+    if(s8retVal != 0)
+    {
+        return -2;
+    }
+    return 0;
 }
 
 
 int main(void)
 {
     uint8_t u8counter = 0;
-    uint8_t u8data;
+    uint8_t u8dataType,u8dataLength;
+    int8_t s8retVal;
     
     SystemInit();
     
@@ -329,6 +369,43 @@ int main(void)
     
     //__enable_irq();
     
+    
+//    au8usartReceiveData[0] = 0x7E;
+//    au8usartReceiveData[1] = 0x02;
+//    au8usartReceiveData[2] = 0x7C;
+//    au8usartReceiveData[3] = 0xDF;
+//    au8usartReceiveData[4] = 0x6A;
+//    au8usartReceiveData[5] = 0x40;
+//    au8usartReceiveData[6] = 0x7E;
+//    
+//    while(1)
+//    {
+//        s8retVal = usart_prot_receive(&au8data[0],&u8dataType,&u8dataLength,&au8usartReceiveData[0],7);
+//        //usartDMASend(&s8retVal,1);
+//        usartDMASend(&au8data[0],u8dataLength);
+//        wait_1ms(1000);
+//    }
+    
+    
+    au8usartReceiveData[0] = 0x7E;
+    au8usartReceiveData[1] = 0x04;
+    au8usartReceiveData[2] = 0xFB;
+    au8usartReceiveData[3] = 0xBE;
+    au8usartReceiveData[4] = 0xA0;
+    au8usartReceiveData[5] = 0x0F;
+    au8usartReceiveData[6] = 0xA3;
+    au8usartReceiveData[7] = 0xC0;
+    au8usartReceiveData[8] = 0x7E;
+    
+    while(1)
+    {
+        s8retVal = usart_prot_receive(&au8data[0],&u8dataType,&u8dataLength,&au8usartReceiveData[0],9);
+        //usartDMASend(&s8retVal,1);
+        usartDMASend(&au8data[0],u8dataLength);
+        wait_1ms(1000);
+    }
+    
+    
 //    au8data[0] = 0x7D;
 //    au8data[1] = 0xBF;
 //    
@@ -339,16 +416,16 @@ int main(void)
 //    }
     
     
-    au8data[0] = 0xFF;
-    au8data[1] = 0x7E;
-    au8data[2] = 0x80;
-    au8data[3] = 0x3F;
-    
-    while(1)
-    {
-        usart_prot_send(&au8data[0],0,4);
-        wait_1ms(1000);
-    }
+//    au8data[0] = 0xFF;
+//    au8data[1] = 0x7E;
+//    au8data[2] = 0x80;
+//    au8data[3] = 0x3F;
+//    
+//    while(1)
+//    {
+//        usart_prot_send(&au8data[0],0,4);
+//        wait_1ms(1000);
+//    }
     
     
 }
@@ -372,7 +449,7 @@ while(1)
     
     while(1)
     {
-        usartDMASend(&au8usartData[0],4);
+        usartDMASend(&au8usartSendData[0],4);
         wait_1ms(500);
         usartSendByte(0x3A);
         wait_1ms(500);
