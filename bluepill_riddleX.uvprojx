@@ -385,6 +385,36 @@
               <FileType>1</FileType>
               <FilePath>.\main.c</FilePath>
             </File>
+            <File>
+              <FileName>usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\usart.h</FilePath>
+            </File>
+            <File>
+              <FileName>utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\utils.h</FilePath>
+            </File>
+            <File>
+              <FileName>usart_prot.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\usart_prot.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart_prot.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\usart_prot.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
