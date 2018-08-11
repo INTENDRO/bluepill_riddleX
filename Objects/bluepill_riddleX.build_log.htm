@@ -27,13 +27,13 @@ Project File Date:  08/09/2018
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Rebuild target 'Target 1'
-compiling utils.c...
 compiling main.c...
 main.c(70): warning:  #223-D: function "usart_prot_receive" declared implicitly
           s8retVal = usart_prot_receive(&au8data[0],&u8dataType,&u8dataLength,&au8usartReceiveData[0],9);
 main.c(24): warning:  #550-D: variable "s8retVal"  was set but never used
       int8_t s8retVal;
 main.c: 2 warnings, 0 errors
+compiling utils.c...
 compiling usart.c...
 assembling startup_stm32f10x_md.s...
 compiling usart_prot.c...
@@ -66,14 +66,14 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: Keil::Device:Startup:1.0.0
-      Source file:   Device\Source\ARM\startup_stm32f10x_md.s
-      Source file:   Device\Source\ARM\STM32F1xx_OPT.s
-      Include file:  RTE_Driver\Config\RTE_Device.h
       Source file:   Device\Source\system_stm32f10x.c
+      Source file:   Device\Source\ARM\startup_stm32f10x_md.s
+      Include file:  RTE_Driver\Config\RTE_Device.h
+      Source file:   Device\Source\ARM\STM32F1xx_OPT.s
 
    * Component: ARM::CMSIS:CORE:5.1.1
 Target not created.
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:04
 </pre>
 </body>
 </html>
