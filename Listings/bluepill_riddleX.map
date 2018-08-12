@@ -8,22 +8,21 @@ Section Cross References
     main.o(i.main) refers to usart.o(i.usartInit) for usartInit
     main.o(i.main) refers to utils.o(i.wait_1ms) for wait_1ms
     main.o(i.main) refers to usart.o(i.usartClearFlagsAndBuffer) for usartClearFlagsAndBuffer
-    main.o(i.main) refers to main.o(i.usart_prot_receive) for usart_prot_receive
+    main.o(i.main) refers to usart_prot.o(i.usart_prot_receive) for usart_prot_receive
     main.o(i.main) refers to usart.o(i.usartDMASend) for usartDMASend
     main.o(i.main) refers to main.o(.bss) for au8usartReceiveData
-    main.o(i.usart_prot_get_packet) refers to rt_memcpy_v6.o(.text) for __aeabi_memcpy
-    main.o(i.usart_prot_get_packet) refers to main.o(i.crc8) for crc8
-    main.o(i.usart_prot_receive) refers to main.o(i.usart_prot_unstuff) for usart_prot_unstuff
-    main.o(i.usart_prot_receive) refers to main.o(i.usart_prot_unpackage) for usart_prot_unpackage
-    main.o(i.usart_prot_send) refers to main.o(i.usart_prot_get_packet) for usart_prot_get_packet
-    main.o(i.usart_prot_send) refers to main.o(i.usart_prot_stuff) for usart_prot_stuff
-    main.o(i.usart_prot_send) refers to usart.o(i.usartDMASend) for usartDMASend
-    main.o(i.usart_prot_send) refers to main.o(.bss) for au8usartSendData
-    main.o(i.usart_prot_unpackage) refers to main.o(i.crc8) for crc8
-    main.o(i.usart_prot_unpackage) refers to rt_memcpy_v6.o(.text) for __aeabi_memcpy
     usart.o(i.USART1_IRQHandler) refers to usart.o(.data) for u8usartData
     usart.o(i.usartInit) refers to system_stm32f10x.o(.data) for SystemCoreClock
     utils.o(i.wait_1ms) refers to system_stm32f10x.o(.data) for SystemCoreClock
+    usart_prot.o(i.usart_prot_get_packet) refers to rt_memcpy_v6.o(.text) for __aeabi_memcpy
+    usart_prot.o(i.usart_prot_get_packet) refers to usart_prot.o(i.crc8) for crc8
+    usart_prot.o(i.usart_prot_receive) refers to usart_prot.o(i.usart_prot_unstuff) for usart_prot_unstuff
+    usart_prot.o(i.usart_prot_receive) refers to usart_prot.o(i.usart_prot_unpackage) for usart_prot_unpackage
+    usart_prot.o(i.usart_prot_send) refers to usart_prot.o(i.usart_prot_get_packet) for usart_prot_get_packet
+    usart_prot.o(i.usart_prot_send) refers to usart_prot.o(i.usart_prot_stuff) for usart_prot_stuff
+    usart_prot.o(i.usart_prot_send) refers to usart.o(i.usartDMASend) for usartDMASend
+    usart_prot.o(i.usart_prot_unpackage) refers to usart_prot.o(i.crc8) for crc8
+    usart_prot.o(i.usart_prot_unpackage) refers to rt_memcpy_v6.o(.text) for __aeabi_memcpy
     startup_stm32f10x_md.o(STACK) refers (Special) to heapauxi.o(.text) for __use_two_region_memory
     startup_stm32f10x_md.o(HEAP) refers (Special) to heapauxi.o(.text) for __use_two_region_memory
     startup_stm32f10x_md.o(RESET) refers (Special) to heapauxi.o(.text) for __use_two_region_memory
@@ -146,9 +145,6 @@ Removing Unused input sections from the image.
     Removing main.o(.rev16_text), (4 bytes).
     Removing main.o(.revsh_text), (4 bytes).
     Removing main.o(.rrx_text), (6 bytes).
-    Removing main.o(i.usart_prot_get_packet), (52 bytes).
-    Removing main.o(i.usart_prot_send), (52 bytes).
-    Removing main.o(i.usart_prot_stuff), (460 bytes).
     Removing usart.o(.rev16_text), (4 bytes).
     Removing usart.o(.revsh_text), (4 bytes).
     Removing usart.o(.rrx_text), (6 bytes).
@@ -161,12 +157,15 @@ Removing Unused input sections from the image.
     Removing usart_prot.o(.rev16_text), (4 bytes).
     Removing usart_prot.o(.revsh_text), (4 bytes).
     Removing usart_prot.o(.rrx_text), (6 bytes).
+    Removing usart_prot.o(i.usart_prot_get_packet), (56 bytes).
+    Removing usart_prot.o(i.usart_prot_send), (52 bytes).
+    Removing usart_prot.o(i.usart_prot_stuff), (460 bytes).
     Removing system_stm32f10x.o(.rev16_text), (4 bytes).
     Removing system_stm32f10x.o(.revsh_text), (4 bytes).
     Removing system_stm32f10x.o(.rrx_text), (6 bytes).
     Removing system_stm32f10x.o(i.SystemCoreClockUpdate), (164 bytes).
 
-22 unused section(s) (total 890 bytes) removed from the image.
+22 unused section(s) (total 894 bytes) removed from the image.
 
 ==============================================================================
 
@@ -178,22 +177,22 @@ Image Symbol Table
 
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit2.o ABSOLUTE
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit1.o ABSOLUTE
-    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardshut.o ABSOLUTE
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit3.o ABSOLUTE
-    ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_copy.o ABSOLUTE
+    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardshut.o ABSOLUTE
     ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_zi.o ABSOLUTE
+    ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_copy.o ABSOLUTE
+    ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit2.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit.o ABSOLUTE
+    ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry4.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry2.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry.o ABSOLUTE
-    ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit2.o ABSOLUTE
-    ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry4.o ABSOLUTE
     ../clib/angel/rt.s                       0x00000000   Number         0  rt_raise.o ABSOLUTE
     ../clib/angel/scatter.s                  0x00000000   Number         0  __scatter.o ABSOLUTE
     ../clib/angel/startup.s                  0x00000000   Number         0  __main.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  sys_stackheap_outer.o ABSOLUTE
+    ../clib/angel/sys.s                      0x00000000   Number         0  libspace.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  indicate_semi.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  use_no_semi.o ABSOLUTE
-    ../clib/angel/sys.s                      0x00000000   Number         0  libspace.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_wrch.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_command.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_exit.o ABSOLUTE
@@ -203,9 +202,9 @@ Image Symbol Table
     ../clib/armsys.c                         0x00000000   Number         0  argv_veneer.o ABSOLUTE
     ../clib/heapalloc.c                      0x00000000   Number         0  hrguard.o ABSOLUTE
     ../clib/heapaux.c                        0x00000000   Number         0  heapauxi.o ABSOLUTE
-    ../clib/libinit.s                        0x00000000   Number         0  libshutdown2.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libinit2.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libshutdown.o ABSOLUTE
+    ../clib/libinit.s                        0x00000000   Number         0  libshutdown2.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libinit.o ABSOLUTE
     ../clib/memcpset.s                       0x00000000   Number         0  rt_memcpy_v6.o ABSOLUTE
     ../clib/memcpset.s                       0x00000000   Number         0  rt_memcpy_w.o ABSOLUTE
@@ -213,12 +212,12 @@ Image Symbol Table
     ../clib/signal.c                         0x00000000   Number         0  defsig_pvfn_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_general.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_exit.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_formal.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_cppl_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_segv_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  __raise.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_exit.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_formal.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_other.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  __raise.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_rtred_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_abrt_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_inner.o ABSOLUTE
@@ -300,14 +299,14 @@ Image Symbol Table
     SetSysClockTo72                          0x08000339   Thumb Code   214  system_stm32f10x.o(i.SetSysClockTo72)
     i.SystemInit                             0x08000418   Section        0  system_stm32f10x.o(i.SystemInit)
     i.USART1_IRQHandler                      0x08000478   Section        0  usart.o(i.USART1_IRQHandler)
-    i.crc8                                   0x080004b0   Section        0  main.o(i.crc8)
+    i.crc8                                   0x080004b0   Section        0  usart_prot.o(i.crc8)
     i.main                                   0x080004ec   Section        0  main.o(i.main)
     i.usartClearFlagsAndBuffer               0x08000584   Section        0  usart.o(i.usartClearFlagsAndBuffer)
     i.usartDMASend                           0x080005a0   Section        0  usart.o(i.usartDMASend)
     i.usartInit                              0x08000600   Section        0  usart.o(i.usartInit)
-    i.usart_prot_receive                     0x080006e0   Section        0  main.o(i.usart_prot_receive)
-    i.usart_prot_unpackage                   0x0800072e   Section        0  main.o(i.usart_prot_unpackage)
-    i.usart_prot_unstuff                     0x08000778   Section        0  main.o(i.usart_prot_unstuff)
+    i.usart_prot_receive                     0x080006e0   Section        0  usart_prot.o(i.usart_prot_receive)
+    i.usart_prot_unpackage                   0x0800072e   Section        0  usart_prot.o(i.usart_prot_unpackage)
+    i.usart_prot_unstuff                     0x08000778   Section        0  usart_prot.o(i.usart_prot_unstuff)
     i.wait_1ms                               0x080008f0   Section        0  utils.o(i.wait_1ms)
     .data                                    0x20000000   Section        2  usart.o(.data)
     .data                                    0x20000004   Section       20  system_stm32f10x.o(.data)
@@ -478,14 +477,14 @@ Image Symbol Table
     __semihosting_library_function           0x0800032f   Thumb Code     0  indicate_semi.o(.text)
     SystemInit                               0x08000419   Thumb Code    78  system_stm32f10x.o(i.SystemInit)
     USART1_IRQHandler                        0x08000479   Thumb Code    44  usart.o(i.USART1_IRQHandler)
-    crc8                                     0x080004b1   Thumb Code    58  main.o(i.crc8)
+    crc8                                     0x080004b1   Thumb Code    58  usart_prot.o(i.crc8)
     main                                     0x080004ed   Thumb Code   136  main.o(i.main)
     usartClearFlagsAndBuffer                 0x08000585   Thumb Code    22  usart.o(i.usartClearFlagsAndBuffer)
     usartDMASend                             0x080005a1   Thumb Code    84  usart.o(i.usartDMASend)
     usartInit                                0x08000601   Thumb Code   202  usart.o(i.usartInit)
-    usart_prot_receive                       0x080006e1   Thumb Code    78  main.o(i.usart_prot_receive)
-    usart_prot_unpackage                     0x0800072f   Thumb Code    74  main.o(i.usart_prot_unpackage)
-    usart_prot_unstuff                       0x08000779   Thumb Code   374  main.o(i.usart_prot_unstuff)
+    usart_prot_receive                       0x080006e1   Thumb Code    78  usart_prot.o(i.usart_prot_receive)
+    usart_prot_unpackage                     0x0800072f   Thumb Code    74  usart_prot.o(i.usart_prot_unpackage)
+    usart_prot_unstuff                       0x08000779   Thumb Code   374  usart_prot.o(i.usart_prot_unstuff)
     wait_1ms                                 0x080008f1   Thumb Code   154  utils.o(i.wait_1ms)
     Region$$Table$$Base                      0x08000998   Number         0  anon$$obj.o(Region$$Table)
     Region$$Table$$Limit                     0x080009b8   Number         0  anon$$obj.o(Region$$Table)
@@ -575,18 +574,18 @@ Memory Map of the image
     0x08000336   0x08000336   0x00000002   PAD
     0x08000338   0x08000338   0x000000e0   Code   RO          231    i.SetSysClockTo72   system_stm32f10x.o
     0x08000418   0x08000418   0x00000060   Code   RO          233    i.SystemInit        system_stm32f10x.o
-    0x08000478   0x08000478   0x00000038   Code   RO          111    i.USART1_IRQHandler  usart.o
-    0x080004b0   0x080004b0   0x0000003a   Code   RO            4    i.crc8              main.o
+    0x08000478   0x08000478   0x00000038   Code   RO           69    i.USART1_IRQHandler  usart.o
+    0x080004b0   0x080004b0   0x0000003a   Code   RO          160    i.crc8              usart_prot.o
     0x080004ea   0x080004ea   0x00000002   PAD
-    0x080004ec   0x080004ec   0x00000098   Code   RO            5    i.main              main.o
-    0x08000584   0x08000584   0x0000001c   Code   RO          112    i.usartClearFlagsAndBuffer  usart.o
-    0x080005a0   0x080005a0   0x00000060   Code   RO          113    i.usartDMASend      usart.o
-    0x08000600   0x08000600   0x000000e0   Code   RO          116    i.usartInit         usart.o
-    0x080006e0   0x080006e0   0x0000004e   Code   RO            7    i.usart_prot_receive  main.o
-    0x0800072e   0x0800072e   0x0000004a   Code   RO           10    i.usart_prot_unpackage  main.o
-    0x08000778   0x08000778   0x00000176   Code   RO           11    i.usart_prot_unstuff  main.o
+    0x080004ec   0x080004ec   0x00000098   Code   RO            4    i.main              main.o
+    0x08000584   0x08000584   0x0000001c   Code   RO           70    i.usartClearFlagsAndBuffer  usart.o
+    0x080005a0   0x080005a0   0x00000060   Code   RO           71    i.usartDMASend      usart.o
+    0x08000600   0x08000600   0x000000e0   Code   RO           74    i.usartInit         usart.o
+    0x080006e0   0x080006e0   0x0000004e   Code   RO          162    i.usart_prot_receive  usart_prot.o
+    0x0800072e   0x0800072e   0x0000004a   Code   RO          165    i.usart_prot_unpackage  usart_prot.o
+    0x08000778   0x08000778   0x00000176   Code   RO          166    i.usart_prot_unstuff  usart_prot.o
     0x080008ee   0x080008ee   0x00000002   PAD
-    0x080008f0   0x080008f0   0x000000a8   Code   RO          178    i.wait_1ms          utils.o
+    0x080008f0   0x080008f0   0x000000a8   Code   RO          136    i.wait_1ms          utils.o
     0x08000998   0x08000998   0x00000020   Data   RO          436    Region$$Table       anon$$obj.o
 
 
@@ -594,7 +593,7 @@ Memory Map of the image
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x080009b8   0x00000002   Data   RW          118    .data               usart.o
+    0x20000000   0x080009b8   0x00000002   Data   RW           76    .data               usart.o
     0x20000002   0x080009ba   0x00000002   PAD
     0x20000004   0x080009bc   0x00000014   Data   RW          234    .data               system_stm32f10x.o
 
@@ -603,7 +602,7 @@ Memory Map of the image
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000018        -       0x000000f0   Zero   RW           12    .bss                main.o
+    0x20000018        -       0x000000f0   Zero   RW            5    .bss                main.o
     0x20000108        -       0x00000060   Zero   RW          310    .bss                c_w.l(libspace.o)
     0x20000168        -       0x00000200   Zero   RW          221    HEAP                startup_stm32f10x_md.o
     0x20000368        -       0x00000400   Zero   RW          220    STACK               startup_stm32f10x_md.o
@@ -616,14 +615,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       736         16          0          0        240     210966   main.o
+       152         16          0          0        240     207562   main.o
         64         26        236          0       1536        816   startup_stm32f10x_md.o
        328         28          0         20          0       2265   system_stm32f10x.o
        404         52          0          2          0      27700   usart.o
+       584          0          0          0          0       3800   usart_prot.o
        168         14          0          0          0        511   utils.o
 
     ----------------------------------------------------------------------
-      1706        136        268         24       1776     242258   Object Totals
+      1706        136        268         24       1776     242654   Object Totals
          0          0         32          0          0          0   (incl. Generated)
          6          0          0          2          0          0   (incl. Padding)
 
@@ -674,8 +674,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      2220        152        268         24       1872     242206   Grand Totals
-      2220        152        268         24       1872     242206   ELF Image Totals
+      2220        152        268         24       1872     242602   Grand Totals
+      2220        152        268         24       1872     242602   ELF Image Totals
       2220        152        268         24          0          0   ROM Totals
 
 ==============================================================================

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\bluepill_riddleX.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\bluepill_riddleX.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Thu Aug 09 21:00:35 2018
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sun Aug 12 16:14:06 2018
 <BR><P>
 <H3>Maximum Stack Usage =        180 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -502,7 +502,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f10x_md.o(RESET)
 </UL>
-<P><STRONG><a name="[59]"></a>crc8</STRONG> (Thumb, 58 bytes, Stack size 20 bytes, main.o(i.crc8))
+<P><STRONG><a name="[59]"></a>crc8</STRONG> (Thumb, 58 bytes, Stack size 20 bytes, usart_prot.o(i.crc8))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = crc8
 </UL>
 <BR>[Called By]<UL><LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usart_prot_unpackage
@@ -512,11 +512,11 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 180<LI>Call Chain = main &rArr; usart_prot_receive &rArr; usart_prot_unpackage &rArr; crc8
 </UL>
 <BR>[Calls]<UL><LI><a href="#[53]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;wait_1ms
+<LI><a href="#[55]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usart_prot_receive
 <LI><a href="#[52]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usartInit
 <LI><a href="#[56]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usartDMASend
 <LI><a href="#[54]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usartClearFlagsAndBuffer
 <LI><a href="#[38]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemInit
-<LI><a href="#[55]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usart_prot_receive
 </UL>
 <BR>[Called By]<UL><LI><a href="#[45]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry_main
 </UL>
@@ -537,7 +537,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[55]"></a>usart_prot_receive</STRONG> (Thumb, 78 bytes, Stack size 120 bytes, main.o(i.usart_prot_receive))
+<P><STRONG><a name="[55]"></a>usart_prot_receive</STRONG> (Thumb, 78 bytes, Stack size 120 bytes, usart_prot.o(i.usart_prot_receive))
 <BR><BR>[Stack]<UL><LI>Max Depth = 164<LI>Call Chain = usart_prot_receive &rArr; usart_prot_unpackage &rArr; crc8
 </UL>
 <BR>[Calls]<UL><LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usart_prot_unstuff
@@ -546,7 +546,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[58]"></a>usart_prot_unpackage</STRONG> (Thumb, 74 bytes, Stack size 24 bytes, main.o(i.usart_prot_unpackage))
+<P><STRONG><a name="[58]"></a>usart_prot_unpackage</STRONG> (Thumb, 74 bytes, Stack size 24 bytes, usart_prot.o(i.usart_prot_unpackage))
 <BR><BR>[Stack]<UL><LI>Max Depth = 44<LI>Call Chain = usart_prot_unpackage &rArr; crc8
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
@@ -555,7 +555,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[55]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usart_prot_receive
 </UL>
 
-<P><STRONG><a name="[57]"></a>usart_prot_unstuff</STRONG> (Thumb, 374 bytes, Stack size 36 bytes, main.o(i.usart_prot_unstuff))
+<P><STRONG><a name="[57]"></a>usart_prot_unstuff</STRONG> (Thumb, 374 bytes, Stack size 36 bytes, usart_prot.o(i.usart_prot_unstuff))
 <BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = usart_prot_unstuff
 </UL>
 <BR>[Called By]<UL><LI><a href="#[55]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usart_prot_receive

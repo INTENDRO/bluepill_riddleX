@@ -32,11 +32,13 @@ uint8_t crc8(uint8_t* u8data_ptr, uint8_t u8length)
 }
 
 
-void usart_prot_get_packet(uint8_t* u8packet_ptr, uint8_t* u8rawData_ptr, uint8_t u8length, uint8_t u8dataType)
+uint8_t usart_prot_get_packet(uint8_t* u8packet_ptr, uint8_t* u8rawData_ptr, uint8_t u8length, uint8_t u8dataType)
 {
     *u8packet_ptr = ((u8dataType&0x03)<<6) | (u8length&0x3F);
     memcpy(u8packet_ptr+1,u8rawData_ptr,u8length);
     *(u8packet_ptr+u8length+1) = crc8(u8packet_ptr,u8length+1);
+    
+    return u8length + 2;
 }
 
 
@@ -174,13 +176,12 @@ int8_t usart_prot_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u
 
 void usart_prot_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
 {
-    uint8_t u8stuffedLength;
+    uint8_t u8stuffedLength,u8protLength;
     uint8_t au8temp[80];
     
-    usart_prot_get_packet(&au8temp[0],u8dataToSend_ptr,u8length,u8dataType);
-    
-    u8stuffedLength = usart_prot_stuff(&au8usartSendData[0],&au8temp[0],u8length+2);
-    usartDMASend(&au8usartSendData[0],u8stuffedLength);
+    u8protLength = usart_prot_get_packet(&au8temp[0],u8dataToSend_ptr,u8length,u8dataType);
+    u8stuffedLength = usart_prot_stuff(u8dataToSend_ptr,&au8temp[0],u8protLength);
+    usartDMASend(u8dataToSend_ptr,u8stuffedLength);
 }
 
 
@@ -191,7 +192,7 @@ int8_t usart_prot_receive(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8d
     uint8_t au8temp[80];
     
     s8unstuffedLength = usart_prot_unstuff(&au8temp[0],u8rawData_ptr,u8rawDataLength);
-    if(s8unstuffedLength < 2) //minimum length: 2 (opcode and crc). also: negative numbers are also errors
+    if((s8unstuffedLength < 2) || (s8unstuffedLength > 65)) //minimum length: 2 (opcode and crc). also: negative numbers are also errors
     {
         return -1;
     }

@@ -2,6 +2,7 @@
 
 #include "utils.h"
 #include "usart.h"
+#include "usart_prot.h"
 
 uint8_t au8usartSendData[80];
 uint8_t au8usartReceiveData[80];

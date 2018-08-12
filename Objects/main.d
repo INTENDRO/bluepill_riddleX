@@ -9,3 +9,4 @@
 .\objects\main.o: C:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include\system_stm32f10x.h
 .\objects\main.o: utils.h
 .\objects\main.o: usart.h
+.\objects\main.o: usart_prot.h
