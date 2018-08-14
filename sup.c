@@ -1,7 +1,7 @@
 #include <stm32f10x.h>
 #include <string.h>
 #include "usart.h"
-#include "usart_prot.h"
+#include "sup.h"
 
 
 
@@ -32,7 +32,7 @@ uint8_t crc8(uint8_t* u8data_ptr, uint8_t u8length)
 }
 
 
-uint8_t usart_prot_get_packet(uint8_t* u8packet_ptr, uint8_t* u8rawData_ptr, uint8_t u8length, uint8_t u8dataType)
+uint8_t sup_get_packet(uint8_t* u8packet_ptr, uint8_t* u8rawData_ptr, uint8_t u8length, uint8_t u8dataType)
 {
     *u8packet_ptr = ((u8dataType&0x03)<<6) | (u8length&0x3F);
     memcpy(u8packet_ptr+1,u8rawData_ptr,u8length);
@@ -42,7 +42,7 @@ uint8_t usart_prot_get_packet(uint8_t* u8packet_ptr, uint8_t* u8rawData_ptr, uin
 }
 
 
-int8_t usart_prot_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataLength, uint8_t* u8dataType, uint8_t* u8package_ptr, uint8_t u8packageLength)
+int8_t sup_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataLength, uint8_t* u8dataType, uint8_t* u8package_ptr, uint8_t u8packageLength)
 {
     if(crc8(u8package_ptr,u8packageLength) != 0)
     {
@@ -62,7 +62,7 @@ int8_t usart_prot_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataLength, uint8_t*
 }
 
 
-uint8_t usart_prot_stuff(uint8_t* u8stuffed_ptr, uint8_t* u8data_ptr, uint8_t u8dataLength)
+uint8_t sup_stuff(uint8_t* u8stuffed_ptr, uint8_t* u8data_ptr, uint8_t u8dataLength)
 {
     uint16_t u16dataBitCounter,u16destBitCounter,u16dataMaxBit,u16consecutiveOnes;
     
@@ -109,7 +109,7 @@ uint8_t usart_prot_stuff(uint8_t* u8stuffed_ptr, uint8_t* u8data_ptr, uint8_t u8
 }
 
 
-int8_t usart_prot_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u8stuffedLength)
+int8_t sup_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u8stuffedLength)
 {
     uint16_t u16consecutiveOnes, u16dataBitCounter, u16stuffedBitCounter, u16stuffedBitMax, u16stuffBitCount;
     
@@ -174,30 +174,30 @@ int8_t usart_prot_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u
 }
 
 
-void usart_prot_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
+void sup_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
 {
     uint8_t u8stuffedLength,u8protLength;
     uint8_t au8temp[80];
     
-    u8protLength = usart_prot_get_packet(&au8temp[0],u8dataToSend_ptr,u8length,u8dataType);
-    u8stuffedLength = usart_prot_stuff(u8dataToSend_ptr,&au8temp[0],u8protLength);
+    u8protLength = sup_get_packet(&au8temp[0],u8dataToSend_ptr,u8length,u8dataType);
+    u8stuffedLength = sup_stuff(u8dataToSend_ptr,&au8temp[0],u8protLength);
     usartDMASend(u8dataToSend_ptr,u8stuffedLength);
 }
 
 
-int8_t usart_prot_receive(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLength, uint8_t* u8rawData_ptr, uint8_t u8rawDataLength)
+int8_t sup_receive(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLength, uint8_t* u8rawData_ptr, uint8_t u8rawDataLength)
 {
     int8_t s8unstuffedLength,s8retVal;
     
     uint8_t au8temp[80];
     
-    s8unstuffedLength = usart_prot_unstuff(&au8temp[0],u8rawData_ptr,u8rawDataLength);
+    s8unstuffedLength = sup_unstuff(&au8temp[0],u8rawData_ptr,u8rawDataLength);
     if((s8unstuffedLength < 2) || (s8unstuffedLength > 65)) //minimum length: 2 (opcode and crc). also: negative numbers are also errors
     {
         return -1;
     }
     
-    s8retVal = usart_prot_unpackage(u8data_ptr,u8dataLength,u8dataType,&au8temp[0],(uint8_t)s8unstuffedLength);
+    s8retVal = sup_unpackage(u8data_ptr,u8dataLength,u8dataType,&au8temp[0],(uint8_t)s8unstuffedLength);
     if(s8retVal != 0)
     {
         return -2;

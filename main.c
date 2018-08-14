@@ -2,7 +2,7 @@
 
 #include "utils.h"
 #include "usart.h"
-#include "usart_prot.h"
+#include "sup.h"
 
 uint8_t au8usartSendData[80];
 uint8_t au8usartReceiveData[80];
@@ -11,11 +11,6 @@ uint8_t au8data[80];
 
 
 //uint8_t au8temp[80];
-
-
-
-
-
 
 
 
@@ -49,7 +44,7 @@ int main(void)
 //    
 //    while(1)
 //    {
-//        s8retVal = usart_prot_receive(&au8data[0],&u8dataType,&u8dataLength,&au8usartReceiveData[0],7);
+//        s8retVal = sup_receive(&au8data[0],&u8dataType,&u8dataLength,&au8usartReceiveData[0],7);
 //        //usartDMASend(&s8retVal,1);
 //        usartDMASend(&au8data[0],u8dataLength);
 //        wait_1ms(1000);
@@ -68,7 +63,7 @@ int main(void)
     
     while(1)
     {
-        s8retVal = usart_prot_receive(&au8data[0],&u8dataType,&u8dataLength,&au8usartReceiveData[0],9);
+        s8retVal = sup_receive(&au8data[0],&u8dataType,&u8dataLength,&au8usartReceiveData[0],9);
         //usartDMASend(&s8retVal,1);
         usartDMASend(&au8data[0],u8dataLength);
         wait_1ms(1000);
@@ -80,7 +75,7 @@ int main(void)
 //    
 //    while(1)
 //    {
-//        usart_prot_send(&au8data[0],0,2);
+//        sup_send(&au8data[0],0,2);
 //        wait_1ms(1000);
 //    }
     
@@ -92,7 +87,7 @@ int main(void)
 //    
 //    while(1)
 //    {
-//        usart_prot_send(&au8data[0],0,4);
+//        sup_send(&au8data[0],0,4);
 //        wait_1ms(1000);
 //    }
     

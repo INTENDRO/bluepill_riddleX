@@ -301,8 +301,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\usart_prot.c</PathWithFileName>
-      <FilenameWithoutPath>usart_prot.c</FilenameWithoutPath>
+      <PathWithFileName>.\sup.c</PathWithFileName>
+      <FilenameWithoutPath>sup.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -313,8 +313,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\usart_prot.h</PathWithFileName>
-      <FilenameWithoutPath>usart_prot.h</FilenameWithoutPath>
+      <PathWithFileName>.\sup.h</PathWithFileName>
+      <FilenameWithoutPath>sup.h</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

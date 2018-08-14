@@ -406,14 +406,14 @@
               <FilePath>.\utils.h</FilePath>
             </File>
             <File>
-              <FileName>usart_prot.c</FileName>
+              <FileName>sup.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\usart_prot.c</FilePath>
+              <FilePath>.\sup.c</FilePath>
             </File>
             <File>
-              <FileName>usart_prot.h</FileName>
+              <FileName>sup.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\usart_prot.h</FilePath>
+              <FilePath>.\sup.h</FilePath>
             </File>
           </Files>
         </Group>
