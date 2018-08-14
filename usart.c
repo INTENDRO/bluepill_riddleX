@@ -6,6 +6,21 @@ uint8_t u8usartDataReady = 0;
 uint8_t u8usartData = 0;
 ///////////////////////
 
+void USART1_IRQHandler(void)
+{
+    volatile uint32_t u32temp;
+    u32temp = USART1->SR;
+    if(u32temp & 0x0000000F)
+    {
+        u32temp = USART1->DR;
+    }
+    else
+    {
+        u8usartData = USART1->DR;
+        u8usartDataReady = 1;
+    }
+}
+
 void usartSendByte(uint8_t u8data)
 {
     while(!(USART1->SR & USART_SR_TXE));
@@ -97,17 +112,4 @@ uint8_t usartGetByte(void)
 }
 
 
-void USART1_IRQHandler(void)
-{
-    volatile uint32_t u32temp;
-    u32temp = USART1->SR;
-    if(u32temp & 0x0000000F)
-    {
-        u32temp = USART1->DR;
-    }
-    else
-    {
-        u8usartData = USART1->DR;
-        u8usartDataReady = 1;
-    }
-}
+
