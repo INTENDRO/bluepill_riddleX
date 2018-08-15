@@ -1,34 +1,81 @@
 #include <stm32f10x.h>
 #include "usart.h"
 
-//IRQ ONLY!!!////////////
-uint8_t u8usartDataReady = 0;
-uint8_t u8usartData = 0;
+
 ///////////////////////
+
+static struct usart_rec_t usartStruct[2];
+static uint8_t u8currentStruct;
+static enum error_state_t error_state;
+
 
 void USART1_IRQHandler(void)
 {
     volatile uint32_t u32temp;
+    volatile uint8_t u8data;
+    
     u32temp = USART1->SR;
     if(u32temp & 0x0000000F)
     {
         u32temp = USART1->DR;
+        error_state = USART_ERROR;
     }
     else
     {
-        u8usartData = USART1->DR;
-        u8usartDataReady = 1;
+        u8data = USART1->DR;
+        
+        if(u8data == 0x7E) //delimiter
+        {
+            if(error_state != NONE)
+            {
+                error_state = NONE;
+                usartStruct[u8currentStruct].u8ready = 0; //just to be safe. data NOT ready
+                usartStruct[u8currentStruct].u8count = 0;
+            }
+            else
+            {
+                if(usartStruct[u8currentStruct].u8count != 0) //data in buffer
+                {
+                    usartStruct[u8currentStruct].u8ready = 1;
+                }
+                
+                u8currentStruct = !u8currentStruct;
+                
+                usartStruct[u8currentStruct].u8count = 0;
+                usartStruct[u8currentStruct].u8ready = 0;
+            }
+            
+            
+        }
+        else //data
+        {
+            if(error_state != NONE)
+            {
+                return;
+            }
+            
+            if(usartStruct[u8currentStruct].u8count >= USART_DATA_LENGTH)
+            {
+                error_state = DATA_OVERFLOW;
+            }
+            else
+            {
+                usartStruct[u8currentStruct].au8data[usartStruct[u8currentStruct].u8count] = u8data;
+                usartStruct[u8currentStruct].u8count++;
+            }
+        }
     }
-}
-
-void usartSendByte(uint8_t u8data)
-{
-    while(!(USART1->SR & USART_SR_TXE));
-    USART1->DR = u8data;
 }
 
 void usartInit(uint32_t u32baudrate)
 { 
+    u8currentStruct = 0;
+    error_state = NONE;
+    usartStruct[0].u8count = 0;
+    usartStruct[0].u8ready = 0;
+    usartStruct[1].u8count = 0;
+    usartStruct[1].u8ready = 0;
+    
     //enable gpio clock
     RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
     RCC->APB2ENR |= RCC_APB2ENR_AFIOEN;
@@ -54,6 +101,12 @@ void usartInit(uint32_t u32baudrate)
     
     NVIC_ClearPendingIRQ(USART1_IRQn);
 	NVIC_EnableIRQ(USART1_IRQn);
+}
+
+void usartSendByte(uint8_t u8data)
+{
+    while(!(USART1->SR & USART_SR_TXE));
+    USART1->DR = u8data;
 }
 
 void usartDMASend(uint8_t* u32data_ptr, uint16_t u16length)
