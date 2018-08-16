@@ -1,12 +1,16 @@
 
+
+
 #ifndef USART_H
 #define USART_H
 
-#define USART_DATA_LENGTH 80
+#include "ringbuffer.h"
+
+#define USART_MAX_DATA 80
 
 struct usart_rec_t
 {
-    uint8_t au8data[USART_DATA_LENGTH];
+    uint8_t au8data[USART_MAX_DATA];
     uint8_t u8count;
     uint8_t u8ready;
 };
@@ -21,6 +25,7 @@ enum error_state_t
 
 void usartSendByte(uint8_t u8data);
 void usartInit(uint32_t u32baudrate);
+RingBuff_t* usartGetRingBuffPointer(void);
 void usartDMASend(uint8_t* u32data_ptr, uint16_t u16length);
 void usartClearFlagsAndBuffer(void);
 uint8_t usartDataAvailable(void);

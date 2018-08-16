@@ -168,6 +168,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>s8unstuffedLength</ItemText>
         </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>RingBuffer</ItemText>
+        </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>
@@ -315,6 +320,18 @@
       <bDave2>0</bDave2>
       <PathWithFileName>.\sup.h</PathWithFileName>
       <FilenameWithoutPath>sup.h</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>1</GroupNumber>
+      <FileNumber>8</FileNumber>
+      <FileType>5</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\ringbuffer.h</PathWithFileName>
+      <FilenameWithoutPath>ringbuffer.h</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

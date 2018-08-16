@@ -1,8 +1,10 @@
 #include <stm32f10x.h>
 
+#include "ringbuffer.h"
 #include "utils.h"
 #include "usart.h"
 #include "sup.h"
+
 
 uint8_t au8usartSendData[80];
 uint8_t au8usartReceiveData[80];
@@ -18,6 +20,8 @@ int main(void)
 {
     uint8_t u8dataType,u8dataLength;
     int8_t s8retVal;
+    RingBuff_t* RingBuffer_ptr;
+    uint8_t au8temp[8];
     
     SystemInit();
     
@@ -30,6 +34,19 @@ int main(void)
     wait_1ms(10);
     usartClearFlagsAndBuffer();
     wait_1ms(100);
+    RingBuffer_ptr = usartGetRingBuffPointer();
+    
+    
+    au8usartSendData[0] = 0x7E;
+    au8usartSendData[1] = 0x02;
+    au8usartSendData[2] = 0x7C;
+    au8usartSendData[3] = 0xDF;
+    au8usartSendData[4] = 0x6A;
+    au8usartSendData[5] = 0x40;
+    au8usartSendData[6] = 0x7E;
+    usartDMASend(au8usartSendData,7);
+    wait_1ms(100);
+    usartSendByte(RingBuffer_GetCount(RingBuffer_ptr));
     
     //__enable_irq();
     
@@ -51,23 +68,23 @@ int main(void)
 //    }
     
     
-    au8usartReceiveData[0] = 0x7E;
-    au8usartReceiveData[1] = 0x04;
-    au8usartReceiveData[2] = 0xFB;
-    au8usartReceiveData[3] = 0xBE;
-    au8usartReceiveData[4] = 0xA0;
-    au8usartReceiveData[5] = 0x0F;
-    au8usartReceiveData[6] = 0xA3;
-    au8usartReceiveData[7] = 0xC0;
-    au8usartReceiveData[8] = 0x7E;
-    
-    while(1)
-    {
-        s8retVal = sup_receive(&au8data[0],&u8dataType,&u8dataLength,&au8usartReceiveData[0],9);
-        //usartDMASend(&s8retVal,1);
-        usartDMASend(&au8data[0],u8dataLength);
-        wait_1ms(1000);
-    }
+//    au8usartReceiveData[0] = 0x7E;
+//    au8usartReceiveData[1] = 0x04;
+//    au8usartReceiveData[2] = 0xFB;
+//    au8usartReceiveData[3] = 0xBE;
+//    au8usartReceiveData[4] = 0xA0;
+//    au8usartReceiveData[5] = 0x0F;
+//    au8usartReceiveData[6] = 0xA3;
+//    au8usartReceiveData[7] = 0xC0;
+//    au8usartReceiveData[8] = 0x7E;
+//    
+//    while(1)
+//    {
+//        s8retVal = sup_receive(&au8data[0],&u8dataType,&u8dataLength,&au8usartReceiveData[0],9);
+//        //usartDMASend(&s8retVal,1);
+//        usartDMASend(&au8data[0],u8dataLength);
+//        wait_1ms(1000);
+//    }
     
     
 //    au8data[0] = 0x7D;

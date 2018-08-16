@@ -415,6 +415,11 @@
               <FileType>5</FileType>
               <FilePath>.\sup.h</FilePath>
             </File>
+            <File>
+              <FileName>ringbuffer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\ringbuffer.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

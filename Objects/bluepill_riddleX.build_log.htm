@@ -22,23 +22,41 @@ Dialog DLL:      TCM.DLL V1.32.0.0
  
 <h2>Project:</h2>
 C:\Users\mnose\Documents\github\bluepill_riddleX\bluepill_riddleX.uvprojx
-Project File Date:  08/14/2018
+Project File Date:  08/16/2018
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Rebuild target 'Target 1'
-compiling main.c...
-main.c(20): warning:  #550-D: variable "s8retVal"  was set but never used
-      int8_t s8retVal;
-main.c: 1 warning, 0 errors
-compiling utils.c...
 compiling usart.c...
+ringbuffer.h(240): warning:  #1-D: last line of file ends without a newline
+      
+usart.c(7): warning:  #550-D: variable "usartStruct"  was set but never used
+  static struct usart_rec_t usartStruct[2];
+usart.c(8): warning:  #550-D: variable "u8currentStruct"  was set but never used
+  static uint8_t u8currentStruct;
+usart.c: 3 warnings, 0 errors
+compiling main.c...
+ringbuffer.h(240): warning:  #1-D: last line of file ends without a newline
+      
+main.c(21): warning:  #177-D: variable "u8dataType"  was declared but never referenced
+      uint8_t u8dataType,u8dataLength;
+main.c(21): warning:  #177-D: variable "u8dataLength"  was declared but never referenced
+      uint8_t u8dataType,u8dataLength;
+main.c(22): warning:  #177-D: variable "s8retVal"  was declared but never referenced
+      int8_t s8retVal;
+main.c(24): warning:  #177-D: variable "au8temp"  was declared but never referenced
+      uint8_t au8temp[8];
+main.c: 5 warnings, 0 errors
+compiling utils.c...
 assembling startup_stm32f10x_md.s...
 compiling sup.c...
+ringbuffer.h(240): warning:  #1-D: last line of file ends without a newline
+      
+sup.c: 1 warning, 0 errors
 compiling system_stm32f10x.c...
 linking...
-Program Size: Code=2580 RO-data=268 RW-data=24 ZI-data=2040  
-".\Objects\bluepill_riddleX.axf" - 0 Error(s), 1 Warning(s).
+Program Size: Code=1620 RO-data=268 RW-data=24 ZI-data=3072  
+".\Objects\bluepill_riddleX.axf" - 0 Error(s), 9 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -65,8 +83,8 @@ Package Vendor: Keil
    * Component: Keil::Device:Startup:1.0.0
       Source file:   Device\Source\ARM\startup_stm32f10x_md.s
       Source file:   Device\Source\system_stm32f10x.c
-      Source file:   Device\Source\ARM\STM32F1xx_OPT.s
       Include file:  RTE_Driver\Config\RTE_Device.h
+      Source file:   Device\Source\ARM\STM32F1xx_OPT.s
 
    * Component: ARM::CMSIS:CORE:5.1.1
 Build Time Elapsed:  00:00:02
