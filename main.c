@@ -21,13 +21,14 @@ int main(void)
     uint8_t u8dataType,u8dataLength;
     int8_t s8retVal;
     RingBuff_t* RingBuffer_ptr;
-    uint8_t au8temp[8];
+    uint8_t au8temp[80];
+    uint16_t u16temp;
     
     SystemInit();
     
     RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 	
-	GPIOC->CRH = GPIO_CRH_MODE13_0;
+    GPIOC->CRH = GPIO_CRH_MODE13_0;
     GPIOC->ODR |= GPIO_ODR_ODR13;
     
     usartInit(115200);
@@ -36,19 +37,54 @@ int main(void)
     wait_1ms(100);
     RingBuffer_ptr = usartGetRingBuffPointer();
     
-    
-    au8usartSendData[0] = 0x7E;
-    au8usartSendData[1] = 0x02;
-    au8usartSendData[2] = 0x7C;
-    au8usartSendData[3] = 0xDF;
-    au8usartSendData[4] = 0x6A;
-    au8usartSendData[5] = 0x40;
-    au8usartSendData[6] = 0x7E;
-    usartDMASend(au8usartSendData,7);
-    wait_1ms(100);
-    usartSendByte(RingBuffer_GetCount(RingBuffer_ptr));
-    
     //__enable_irq();
+    
+    
+    RingBuffer_Insert(RingBuffer_ptr,0x7E);
+    RingBuffer_Insert(RingBuffer_ptr,0x02);
+    RingBuffer_Insert(RingBuffer_ptr,0x7C);
+    RingBuffer_Insert(RingBuffer_ptr,0xDF);
+    RingBuffer_Insert(RingBuffer_ptr,0x6A);
+    RingBuffer_Insert(RingBuffer_ptr,0x40);
+    RingBuffer_Insert(RingBuffer_ptr,0x7E);
+    RingBuffer_Insert(RingBuffer_ptr,0x40);
+    RingBuffer_Insert(RingBuffer_ptr,0xC7);
+    RingBuffer_Insert(RingBuffer_ptr,0x7E);
+    
+    while(1)
+    {
+        if(RingBuffer_CountData(RingBuffer_ptr,0x7E) != 0)
+        {
+            u16temp = RingBuffer_RemoveUntilDelimiter(RingBuffer_ptr,au8temp,80,0x7E);
+            if(u16temp != 0)
+            {
+                u16temp = sup_receive(au8temp,&u8dataType,&u8dataLength,au8temp,u16temp);
+                
+                if(u16temp == 0)
+                {
+                    sup_send(au8temp,u8dataType,u8dataLength);
+                }
+            }
+            
+        }
+        
+        wait_1ms(100);
+    }
+    
+//-------------------------------------    
+    
+//    au8usartSendData[0] = 0x7E;
+//    au8usartSendData[1] = 0x02;
+//    au8usartSendData[2] = 0x7C;
+//    au8usartSendData[3] = 0xDF;
+//    au8usartSendData[4] = 0x6A;
+//    au8usartSendData[5] = 0x40;
+//    au8usartSendData[6] = 0x7E;
+//    usartDMASend(au8usartSendData,7);
+//    wait_1ms(100);
+//    usartSendByte(RingBuffer_GetCount(RingBuffer_ptr));
+    
+//-------------------------------------
     
     
 //    au8usartReceiveData[0] = 0x7E;
@@ -66,7 +102,8 @@ int main(void)
 //        usartDMASend(&au8data[0],u8dataLength);
 //        wait_1ms(1000);
 //    }
-    
+
+//-------------------------------------
     
 //    au8usartReceiveData[0] = 0x7E;
 //    au8usartReceiveData[1] = 0x04;
@@ -86,7 +123,9 @@ int main(void)
 //        wait_1ms(1000);
 //    }
     
-    
+
+//-------------------------------------
+
 //    au8data[0] = 0x7D;
 //    au8data[1] = 0xBF;
 //    
@@ -96,7 +135,16 @@ int main(void)
 //        wait_1ms(1000);
 //    }
     
+//-------------------------------------
+
+
+//    while(1)
+//    {
+//        sup_send(&au8data[0],1,0);
+//        wait_1ms(1000);
+//    }
     
+//-------------------------------------
 //    au8data[0] = 0xFF;
 //    au8data[1] = 0x7E;
 //    au8data[2] = 0x80;

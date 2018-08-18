@@ -170,10 +170,13 @@ int8_t sup_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u8stuffe
             u16stuffedBitCounter++;
         }
     }
-    return (int8_t)(u8stuffedLength - (u16stuffBitCount/8 +1));
+    return (int8_t)(u8stuffedLength - ((u16stuffBitCount+7)/8));
 }
 
 
+
+//bad design! this expects the datatosend_ptr to be big enough to hold the packaged and stuffed data
+//better: have a static array in this module and disable the writing of further data as long as dma still sending -> busy function needed
 void sup_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
 {
     uint8_t u8stuffedLength,u8protLength;

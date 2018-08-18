@@ -44,6 +44,8 @@
 #define _ULW_RING_BUFF_H_
 
 	/* Defines: */
+    #include <stdint.h>
+    
     /** Size of each ring buffer, in data elements - must be between 1 and 255. */
     #define BUFFER_SIZE            1024
 
@@ -184,7 +186,7 @@
 
     static inline void RingBuffer_Peak(RingBuff_t* const Buffer, RingBuff_Data_t* Destination, RingBuff_Count_t PeakLength)
     {
-        int i;
+        RingBuff_Count_t i;
         RingBuff_Data_t* currentRead = Buffer->Out;
 
         for(i=0;i<PeakLength;i++)
@@ -195,7 +197,7 @@
         *(Destination+PeakLength) = 0;
     }
 
-    static inline RingBuff_Count_t RingBuffer_CountChar(RingBuff_t* const Buffer, char charToCheck)
+    static inline RingBuff_Count_t RingBuffer_CountData(RingBuff_t* const Buffer, RingBuff_Data_t dataToCheck)
     {
         RingBuff_Count_t count = 0;
 
@@ -203,7 +205,7 @@
 
         while(currentRead != Buffer->In)
         {
-            if(*currentRead==charToCheck)
+            if(*currentRead==dataToCheck)
             {
                 count++;
             }
@@ -212,27 +214,55 @@
         return(count);
     }
 
-    static inline void RingBuffer_RemoveUntilChar(RingBuff_t* const Buffer, RingBuff_Data_t* Destination, char endChar, uint8_t includingChar)
+    static inline RingBuff_Count_t RingBuffer_RemoveUntilDelimiter(RingBuff_t* const Buffer, RingBuff_Data_t* Destination, RingBuff_Count_t DestinationLength, RingBuff_Data_t delimiter)
     {
         RingBuff_Data_t tempData;
-        unsigned int uiDestinationOffset = 0;
+        RingBuff_Count_t offset = 0;
+        
         
         while(1)
         {
-            tempData = RingBuffer_Remove(Buffer);
-            if(tempData == endChar)
+            if(offset == DestinationLength)
             {
-                if(includingChar)
-                {
-                    *(Destination+uiDestinationOffset) = tempData;
-                    uiDestinationOffset++;
-                }
-                *(Destination+uiDestinationOffset) = 0;
-                break;
+                return 0;
             }
-            *(Destination+uiDestinationOffset) = tempData;
-            uiDestinationOffset++;
+            
+            tempData = RingBuffer_Remove(Buffer);
+            *(Destination+offset) = tempData;
+            offset++;
+            
+            if(tempData == delimiter) //delimiter
+            {
+                return offset;
+            }
         }
+        
+        
+        
+        
+        
+        
+//        if(includingChar)
+//        {
+//            includingChar = 1; //ensure that the variable is either 0 or 1 and nothing else
+//        }
+//        
+//        while(1)
+//        {
+//            tempData = RingBuffer_Remove(Buffer);
+//            if(tempData == endChar)
+//            {
+//                if(includingChar)
+//                {
+//                    *(Destination+uiDestinationOffset) = tempData;
+//                    uiDestinationOffset++;
+//                }
+//                *(Destination+uiDestinationOffset) = 0;
+//                break;
+//            }
+//            *(Destination+uiDestinationOffset) = tempData;
+//            uiDestinationOffset++;
+//        }
     }
 
 #endif
