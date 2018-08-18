@@ -183,6 +183,12 @@
         
         return Data;
     }
+    
+    static inline void RingBuffer_Clear(RingBuff_t* const Buffer)
+    {
+        Buffer->Out   = Buffer->In;
+        Buffer->Count = 0;
+    }
 
     static inline void RingBuffer_Peak(RingBuff_t* const Buffer, RingBuff_Data_t* Destination, RingBuff_Count_t PeakLength)
     {
