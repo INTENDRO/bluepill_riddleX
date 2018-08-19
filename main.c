@@ -45,7 +45,7 @@ void INT_1ms_init(void)
 
 void TIM3_IRQHandler(void)
 {
-	GPIOC->ODR ^= GPIO_ODR_ODR13;
+	GPIOC->ODR &= ~GPIO_ODR_ODR13;
     INTflag = 1;
 	TIM3->SR &= ~TIM_SR_UIF;
 	NVIC_ClearPendingIRQ(TIM3_IRQn);
@@ -77,7 +77,21 @@ int main(void)
     RingBuffer_ptr = usartGetRingBuffPointer();
     
     __enable_irq();
-    
+
+//-------------------------------------
+
+//    au8data[0] = 0x7D;
+//    au8data[1] = 0xBF;
+//    
+//    while(1)
+//    {
+//        GPIOC->ODR &= ~GPIO_ODR_ODR13;
+//        sup_send(&au8data[0],0,2);
+//        while(sup_send_busy());
+//        GPIOC->ODR |= GPIO_ODR_ODR13;
+//        wait_1ms(100);
+//    }
+
     
 //-------------------------------------    
     INT_1ms_init();
@@ -98,6 +112,16 @@ int main(void)
     {
         if(INTflag)
         {
+            u32temp++;
+            au8data[0] = u32temp&0xFF;
+            au8data[1] = (u32temp>>8)&0xFF;
+            au8data[2] = (u32temp>>16)&0xFF;
+            if(u32temp == 0x200000)
+            {
+                break;
+            }
+            
+            
             if(errorFlag)
             {
                 au32errors[u16errorCounter] = u32temp-1;
@@ -117,20 +141,58 @@ int main(void)
             INTflag = 0;
             errorFlag = 1;
             sup_send(au8data,0,3);
-            wait_1ms(1); //wait for data to be send (dma uses the array)
+            wait_1ms(1);
+            GPIOC->ODR |= GPIO_ODR_ODR13;
             
             //decode loopback here
+            if(RingBuffer_CountData(RingBuffer_ptr,0x7E)!=2) //incorrect amount of data in buffer
+            {
+                continue;
+            }
+            
+            RingBuffer_RemoveUntilDelimiter(RingBuffer_ptr,au8temp,80,0x7E);
+            u16temp = RingBuffer_RemoveUntilDelimiter(RingBuffer_ptr,au8temp,80,0x7E);
+            
+            if(u16temp == 0)
+            {
+                continue;
+            }
+            
+            s8retVal = sup_receive(au8usartReceiveData,&u8dataType,&u8dataLength,au8temp,u16temp);
+            if(s8retVal != 0)
+            {
+                continue;
+            }
+            
+            if(u8dataType != 0)
+            {
+                continue;
+            }
+            
+            if(u8dataLength != 3)
+            {
+                continue;
+            }
+            
+             
+            if(au8usartReceiveData[0] != ((u32temp)&0xFF))
+            {
+                continue;
+            } 
+            
+            if(au8usartReceiveData[1] != ((u32temp>>8)&0xFF))
+            {
+                continue;
+            } 
+            
+            if(au8usartReceiveData[2] != ((u32temp>>16)&0xFF))
+            {
+                continue;
+            } 
             
             
             errorFlag = 0;
-            u32temp++;
-            au8data[0] = u32temp&0xFF;
-            au8data[1] = (u32temp>>8)&0xFF;
-            au8data[2] = (u32temp>>16)&0xFF;
-            if(u32temp == 0x5)
-            {
-                break;
-            }
+            
         }
     }
     
@@ -142,6 +204,15 @@ int main(void)
         GPIOC->ODR ^= GPIO_ODR_ODR13;
         usartSendByte((u16errorCounter>>8)&0xFF);
         usartSendByte(u16errorCounter&0xFF);
+        wait_1ms(10);
+        for(i=0;i<u16errorCounter;i++)
+        {
+            usartSendByte((au32errors[i]>>24)&0xFF);
+            usartSendByte((au32errors[i]>>16)&0xFF);
+            usartSendByte((au32errors[i]>>8)&0xFF);
+            usartSendByte(au32errors[i]&0xFF);
+            wait_1ms(1);
+        }
         wait_1ms(1000);
     }
     

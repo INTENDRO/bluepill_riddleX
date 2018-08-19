@@ -242,33 +242,6 @@
                 return offset;
             }
         }
-        
-        
-        
-        
-        
-        
-//        if(includingChar)
-//        {
-//            includingChar = 1; //ensure that the variable is either 0 or 1 and nothing else
-//        }
-//        
-//        while(1)
-//        {
-//            tempData = RingBuffer_Remove(Buffer);
-//            if(tempData == endChar)
-//            {
-//                if(includingChar)
-//                {
-//                    *(Destination+uiDestinationOffset) = tempData;
-//                    uiDestinationOffset++;
-//                }
-//                *(Destination+uiDestinationOffset) = 0;
-//                break;
-//            }
-//            *(Destination+uiDestinationOffset) = tempData;
-//            uiDestinationOffset++;
-//        }
     }
 
 #endif

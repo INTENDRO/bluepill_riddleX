@@ -179,6 +179,18 @@ void usartDMASend(uint8_t* u32data_ptr, uint16_t u16length)
     DMA1_Channel4->CCR |= DMA_CCR4_EN;
 }
 
+uint8_t usartBusy(void)
+{
+    if(USART1->SR & USART_SR_TC)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
 void usartClearFlagsAndBuffer(void)
 {
     volatile uint8_t u8dummy;

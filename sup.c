@@ -4,7 +4,7 @@
 #include "sup.h"
 
 
-
+static uint8_t au8sendBuffer[SUP_MAX_LENGTH];
 
 
 uint8_t crc8(uint8_t* u8data_ptr, uint8_t u8length)
@@ -181,10 +181,11 @@ void sup_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
 {
     uint8_t u8stuffedLength,u8protLength;
     uint8_t au8temp[80];
+    volatile uint32_t u32temp;
     
     u8protLength = sup_get_packet(&au8temp[0],u8dataToSend_ptr,u8length,u8dataType);
-    u8stuffedLength = sup_stuff(u8dataToSend_ptr,&au8temp[0],u8protLength);
-    usartDMASend(u8dataToSend_ptr,u8stuffedLength);
+    u8stuffedLength = sup_stuff(au8sendBuffer,&au8temp[0],u8protLength);
+    usartDMASend(au8sendBuffer,u8stuffedLength);
 }
 
 
@@ -208,3 +209,7 @@ int8_t sup_receive(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLeng
     return 0;
 }
 
+uint8_t sup_send_busy(void)
+{
+    return usartBusy();
+}
