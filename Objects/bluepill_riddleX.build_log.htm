@@ -30,29 +30,9 @@ Rebuild target 'Target 1'
 compiling main.c...
 ringbuffer.h(249): warning:  #1-D: last line of file ends without a newline
       
-main.c(22): warning:  #177-D: variable "u8dataType"  was declared but never referenced
-      uint8_t u8dataType,u8dataLength;
-main.c(22): warning:  #177-D: variable "u8dataLength"  was declared but never referenced
-      uint8_t u8dataType,u8dataLength;
-main.c(23): warning:  #177-D: variable "s8retVal"  was declared but never referenced
-      int8_t s8retVal;
-main.c(24): warning:  #550-D: variable "RingBuffer_ptr"  was set but never used
+main.c(22): warning:  #550-D: variable "RingBuffer_ptr"  was set but never used
       RingBuff_t* RingBuffer_ptr;
-main.c(25): warning:  #177-D: variable "au8temp"  was declared but never referenced
-      uint8_t au8temp[80];
-main.c(26): warning:  #177-D: variable "u16temp"  was declared but never referenced
-      uint16_t u16temp,i,u16errorCounter;
-main.c(26): warning:  #177-D: variable "i"  was declared but never referenced
-      uint16_t u16temp,i,u16errorCounter;
-main.c(26): warning:  #177-D: variable "u16errorCounter"  was declared but never referenced
-      uint16_t u16temp,i,u16errorCounter;
-main.c(27): warning:  #177-D: variable "u32temp"  was declared but never referenced
-      uint32_t u32temp;
-main.c(28): warning:  #177-D: variable "au32errors"  was declared but never referenced
-      uint32_t au32errors[10];
-main.c(29): warning:  #177-D: variable "errorFlag"  was declared but never referenced
-      uint8_t errorFlag = 0;
-main.c: 12 warnings, 0 errors
+main.c: 2 warnings, 0 errors
 compiling utils.c...
 utils.c(60): warning:  #1-D: last line of file ends without a newline
   }
@@ -60,11 +40,7 @@ utils.c: 1 warning, 0 errors
 compiling usart.c...
 ringbuffer.h(249): warning:  #1-D: last line of file ends without a newline
       
-usart.c(7): warning:  #550-D: variable "usartStruct"  was set but never used
-  static struct usart_rec_t usartStruct[2];
-usart.c(8): warning:  #550-D: variable "u8currentStruct"  was set but never used
-  static uint8_t u8currentStruct;
-usart.c: 3 warnings, 0 errors
+usart.c: 1 warning, 0 errors
 assembling startup_stm32f10x_md.s...
 compiling system_stm32f10x.c...
 compiling sup.c...
@@ -72,8 +48,8 @@ ringbuffer.h(249): warning:  #1-D: last line of file ends without a newline
       
 sup.c: 1 warning, 0 errors
 linking...
-Program Size: Code=1656 RO-data=268 RW-data=24 ZI-data=2832  
-".\Objects\bluepill_riddleX.axf" - 0 Error(s), 17 Warning(s).
+Program Size: Code=1620 RO-data=268 RW-data=24 ZI-data=2672  
+".\Objects\bluepill_riddleX.axf" - 0 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -104,7 +80,7 @@ Package Vendor: Keil
       Source file:   Device\Source\ARM\startup_stm32f10x_md.s
 
    * Component: ARM::CMSIS:CORE:5.1.1
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

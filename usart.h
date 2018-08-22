@@ -1,6 +1,4 @@
 
-
-
 #ifndef USART_H
 #define USART_H
 
@@ -8,12 +6,6 @@
 
 #define USART_MAX_DATA 80
 
-struct usart_rec_t
-{
-    uint8_t au8data[USART_MAX_DATA];
-    uint8_t u8count;
-    uint8_t u8ready;
-};
 
 enum error_state_t
 {

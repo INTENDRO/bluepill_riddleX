@@ -4,71 +4,13 @@
 
 ///////////////////////
 
-static struct usart_rec_t usartStruct[2];
-static uint8_t u8currentStruct;
-static enum error_state_t error_state;
 
+static enum error_state_t error_state;
 static RingBuff_t RingBuffer;
 static uint16_t usartDataCount;
 
+///////////////////////
 
-//void USART1_IRQHandler(void)
-//{
-//    volatile uint32_t u32temp;
-//    volatile uint8_t u8data;
-//    
-//    u32temp = USART1->SR;
-//    if(u32temp & 0x0000000F)
-//    {
-//        u32temp = USART1->DR;
-//        error_state = USART_ERROR;
-//    }
-//    else
-//    {
-//        u8data = USART1->DR;
-//        
-//        if(u8data == 0x7E) //delimiter
-//        {
-//            if(error_state != NONE)
-//            {
-//                error_state = NONE;
-//                usartStruct[u8currentStruct].u8ready = 0; //just to be safe. data NOT ready
-//                usartStruct[u8currentStruct].u8count = 0;
-//            }
-//            else
-//            {
-//                if(usartStruct[u8currentStruct].u8count != 0) //data in buffer
-//                {
-//                    usartStruct[u8currentStruct].u8ready = 1;
-//                }
-//                
-//                u8currentStruct = !u8currentStruct;
-//                
-//                usartStruct[u8currentStruct].u8count = 0;
-//                usartStruct[u8currentStruct].u8ready = 0;
-//            }
-//            
-//            
-//        }
-//        else //data
-//        {
-//            if(error_state != NONE)
-//            {
-//                return;
-//            }
-//            
-//            if(usartStruct[u8currentStruct].u8count >= USART_DATA_LENGTH)
-//            {
-//                error_state = DATA_OVERFLOW;
-//            }
-//            else
-//            {
-//                usartStruct[u8currentStruct].au8data[usartStruct[u8currentStruct].u8count] = u8data;
-//                usartStruct[u8currentStruct].u8count++;
-//            }
-//        }
-//    }
-//}
 
 
 void USART1_IRQHandler(void)
@@ -120,12 +62,7 @@ RingBuff_t* usartGetRingBuffPointer(void)
 
 void usartInit(uint32_t u32baudrate)
 { 
-    u8currentStruct = 0;
     error_state = NONE;
-    usartStruct[0].u8count = 0;
-    usartStruct[0].u8ready = 0;
-    usartStruct[1].u8count = 0;
-    usartStruct[1].u8ready = 0;
     
     RingBuffer_InitBuffer(&RingBuffer);
     usartDataCount = 0;

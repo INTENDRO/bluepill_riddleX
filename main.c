@@ -19,14 +19,7 @@ uint8_t INTflag = 0;
 
 int main(void)
 {
-    uint8_t u8dataType,u8dataLength;
-    int8_t s8retVal;
     RingBuff_t* RingBuffer_ptr;
-    uint8_t au8temp[80];
-    uint16_t u16temp,i,u16errorCounter;
-    uint32_t u32temp;
-    uint32_t au32errors[10];
-    uint8_t errorFlag = 0;
     
     
     SystemInit();
