@@ -27,3 +27,34 @@ void wait_1ms(uint16_t u16Factor) // using timer 4
 	}
 	TIM4->CR1 = 0x0000;
 }
+
+
+void INT_1ms_init(void)
+{
+	RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
+	
+	TIM3->CR1 = 0x0000;
+	TIM3->CR2 = 0x0000;
+	TIM3->SMCR = 0x0000;
+	TIM3->CCMR1 = 0x0000;
+	TIM3->CCMR2 = 0x0000;
+	TIM3->CCER = 0x0000;
+	TIM3->PSC = 7199; //10kHz @ 72Mhz
+	TIM3->ARR = 9; // -> 1ms 
+    TIM3->CNT = 0;
+	TIM3->DIER = TIM_DIER_UIE;
+	TIM3->EGR = TIM_EGR_UG;
+	TIM3->SR &= ~TIM_SR_UIF;
+	
+	NVIC_ClearPendingIRQ(TIM3_IRQn);
+	NVIC_EnableIRQ(TIM3_IRQn);
+	
+	TIM3->CR1 |= TIM_CR1_CEN;
+}
+
+void TIM3_IRQHandler(void)
+{
+	GPIOC->ODR ^= GPIO_ODR_ODR13;
+	TIM3->SR &= ~TIM_SR_UIF;
+	NVIC_ClearPendingIRQ(TIM3_IRQn);
+}

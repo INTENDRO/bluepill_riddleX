@@ -32,17 +32,17 @@ uint8_t crc8(uint8_t* u8data_ptr, uint8_t u8length)
 }
 
 
-uint8_t sup_get_packet(uint8_t* u8packet_ptr, uint8_t* u8rawData_ptr, uint8_t u8length, uint8_t u8dataType)
+uint8_t sup_get_packet(uint8_t* u8packet_ptr, uint8_t* u8rawData_ptr, uint8_t u8rawLength, uint8_t u8dataType)
 {
-    *u8packet_ptr = ((u8dataType&0x03)<<6) | (u8length&0x3F);
-    memcpy(u8packet_ptr+1,u8rawData_ptr,u8length);
-    *(u8packet_ptr+u8length+1) = crc8(u8packet_ptr,u8length+1);
+    *u8packet_ptr = ((u8dataType&0x03)<<6) | (u8rawLength&0x3F);
+    memcpy(u8packet_ptr+1,u8rawData_ptr,u8rawLength);
+    *(u8packet_ptr+u8rawLength+1) = crc8(u8packet_ptr,u8rawLength+1);
     
-    return u8length + 2;
+    return u8rawLength + 2;
 }
 
 
-int8_t sup_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataLength, uint8_t* u8dataType, uint8_t* u8package_ptr, uint8_t u8packageLength)
+int8_t sup_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataLength_ptr, uint8_t* u8dataType_ptr, uint8_t* u8package_ptr, uint8_t u8packageLength)
 {
     if(crc8(u8package_ptr,u8packageLength) != 0)
     {
@@ -53,8 +53,8 @@ int8_t sup_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataLength, uint8_t* u8data
     {
         return -2;
     }
-    *u8dataType = (u8package_ptr[0]>>6)&0x03;
-    *u8dataLength = u8packageLength-2;
+    *u8dataType_ptr = (u8package_ptr[0]>>6)&0x03;
+    *u8dataLength_ptr = u8packageLength-2;
     
     memcpy(u8data_ptr,u8package_ptr+1,u8packageLength-2);
     
@@ -175,21 +175,19 @@ int8_t sup_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u8stuffe
 
 
 
-//bad design! this expects the datatosend_ptr to be big enough to hold the packaged and stuffed data
-//better: have a static array in this module and disable the writing of further data as long as dma still sending -> busy function needed
 void sup_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
 {
     uint8_t u8stuffedLength,u8protLength;
     uint8_t au8temp[80];
     volatile uint32_t u32temp;
     
-    u8protLength = sup_get_packet(&au8temp[0],u8dataToSend_ptr,u8length,u8dataType);
-    u8stuffedLength = sup_stuff(au8sendBuffer,&au8temp[0],u8protLength);
+    u8protLength = sup_get_packet(au8temp,u8dataToSend_ptr,u8length,u8dataType);
+    u8stuffedLength = sup_stuff(au8sendBuffer,au8temp,u8protLength);
     usartDMASend(au8sendBuffer,u8stuffedLength);
 }
 
 
-int8_t sup_receive(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLength, uint8_t* u8rawData_ptr, uint8_t u8rawDataLength)
+int8_t sup_receive(uint8_t* u8data_ptr, uint8_t* u8dataType_ptr, uint8_t* u8dataLength_ptr, uint8_t* u8rawData_ptr, uint8_t u8rawDataLength)
 {
     int8_t s8unstuffedLength,s8retVal;
     
@@ -201,7 +199,7 @@ int8_t sup_receive(uint8_t* u8data_ptr, uint8_t* u8dataType, uint8_t* u8dataLeng
         return -1;
     }
     
-    s8retVal = sup_unpackage(u8data_ptr,u8dataLength,u8dataType,&au8temp[0],(uint8_t)s8unstuffedLength);
+    s8retVal = sup_unpackage(u8data_ptr,u8dataLength_ptr,u8dataType_ptr,&au8temp[0],(uint8_t)s8unstuffedLength);
     if(s8retVal != 0)
     {
         return -2;
