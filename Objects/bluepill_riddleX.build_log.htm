@@ -27,29 +27,27 @@ Project File Date:  08/18/2018
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Rebuild target 'Target 1'
-compiling main.c...
-ringbuffer.h(249): warning:  #1-D: last line of file ends without a newline
-      
-main.c(22): warning:  #550-D: variable "RingBuffer_ptr"  was set but never used
-      RingBuff_t* RingBuffer_ptr;
-main.c: 2 warnings, 0 errors
 compiling utils.c...
-utils.c(60): warning:  #1-D: last line of file ends without a newline
+utils.c(59): warning:  #1-D: last line of file ends without a newline
   }
 utils.c: 1 warning, 0 errors
 compiling usart.c...
-ringbuffer.h(249): warning:  #1-D: last line of file ends without a newline
+ringbuffer.h(248): warning:  #1-D: last line of file ends without a newline
       
 usart.c: 1 warning, 0 errors
+compiling main.c...
+ringbuffer.h(248): warning:  #1-D: last line of file ends without a newline
+      
+main.c: 1 warning, 0 errors
 assembling startup_stm32f10x_md.s...
-compiling system_stm32f10x.c...
 compiling sup.c...
-ringbuffer.h(249): warning:  #1-D: last line of file ends without a newline
+ringbuffer.h(248): warning:  #1-D: last line of file ends without a newline
       
 sup.c: 1 warning, 0 errors
+compiling system_stm32f10x.c...
 linking...
-Program Size: Code=1620 RO-data=268 RW-data=24 ZI-data=2672  
-".\Objects\bluepill_riddleX.axf" - 0 Error(s), 5 Warning(s).
+Program Size: Code=3160 RO-data=268 RW-data=24 ZI-data=2752  
+".\Objects\bluepill_riddleX.axf" - 0 Error(s), 4 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -74,13 +72,13 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: Keil::Device:Startup:1.0.0
-      Include file:  RTE_Driver\Config\RTE_Device.h
       Source file:   Device\Source\ARM\STM32F1xx_OPT.s
+      Include file:  RTE_Driver\Config\RTE_Device.h
       Source file:   Device\Source\system_stm32f10x.c
       Source file:   Device\Source\ARM\startup_stm32f10x_md.s
 
    * Component: ARM::CMSIS:CORE:5.1.1
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>

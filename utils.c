@@ -54,7 +54,6 @@ void INT_1ms_init(void)
 
 void TIM3_IRQHandler(void)
 {
-	GPIOC->ODR ^= GPIO_ODR_ODR13;
 	TIM3->SR &= ~TIM_SR_UIF;
 	NVIC_ClearPendingIRQ(TIM3_IRQn);
 }
