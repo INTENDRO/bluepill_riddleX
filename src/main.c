@@ -53,11 +53,17 @@ int main(void)
 	GPIOC->ODR |= GPIO_ODR_ODR13;
 
 	usartInit(115200);
-	usartSendByte(0x12);
+
 	wait_1ms(10);
 	usartClearFlagsAndBuffer();
 	wait_1ms(100);
 	RingBuffer_ptr = usartGetRingBuffPointer();
+	au8data[0] = 0x12;
+	au8data[1] = 0x34;
+	au8data[2] = 0x56;
+	sup_send_busy();
+	sup_send(au8data,0x02,0x03);
+	sup_send_busy();
 
 	__enable_irq();
 
