@@ -175,7 +175,7 @@ int8_t sup_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u8stuffe
 
 
 
-void sup_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
+void sup_send(uint8_t u8dataType, uint8_t* u8dataToSend_ptr, uint8_t u8length)
 {
     uint8_t u8stuffedLength,u8protLength;
     uint8_t au8temp[80];
@@ -186,7 +186,7 @@ void sup_send(uint8_t* u8dataToSend_ptr,uint8_t u8dataType,uint8_t u8length)
 }
 
 
-int8_t sup_receive(uint8_t* u8data_ptr, uint8_t* u8dataType_ptr, uint8_t* u8dataLength_ptr, uint8_t* u8rawData_ptr, uint8_t u8rawDataLength)
+int8_t sup_receive(uint8_t* u8dataType_ptr, uint8_t* u8data_ptr, uint8_t* u8dataLength_ptr, uint8_t* u8rawData_ptr, uint8_t u8rawDataLength)
 {
     int8_t s8unstuffedLength,s8retVal;
     

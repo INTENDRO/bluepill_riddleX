@@ -58,12 +58,22 @@ int main(void)
 	usartClearFlagsAndBuffer();
 	wait_1ms(100);
 	RingBuffer_ptr = usartGetRingBuffPointer();
+	/*
 	au8data[0] = 0x12;
 	au8data[1] = 0x34;
-	au8data[2] = 0x56;
+	au8data[2] = 0x57;
 	sup_send_busy();
-	sup_send(au8data,0x02,0x03);
+	sup_send(0x02,au8data,0x03);
 	sup_send_busy();
+	*/
+
+	/*
+	au8data[0] = 0xFF;
+	sup_send_busy();
+	sup_send(0x0,au8data,0x01);
+	sup_send_busy();
+	*/
+
 
 	__enable_irq();
 
@@ -73,11 +83,11 @@ int main(void)
 		if(RingBuffer_CountData(RingBuffer_ptr,0x7E))
 		{
 			u16rawDataLength = RingBuffer_RemoveUntilDelimiter(RingBuffer_ptr,au8rawData,80,0x7E);
-			s8retVal = sup_receive(au8data,&u8dataType,&u8dataLength,au8rawData,u16rawDataLength);
+			s8retVal = sup_receive(&u8dataType,au8data,&u8dataLength,au8rawData,u16rawDataLength);
 			if(s8retVal == 0)
 			{
-				while(usartBusy());
-				sup_send(au8data,u8dataType,u8dataLength);
+				while(sup_send_busy());
+				sup_send(u8dataType,au8data,u8dataLength);
 			}
 		}
 	}
