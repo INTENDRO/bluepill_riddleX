@@ -4,16 +4,17 @@
 #include "sup.h"
 
 
-static uint8_t au8sendBuffer[SUP_MAX_LENGTH];
+static uint8_t au8sendBuffer[SUP_BUFFER_SIZE];
 
 
-uint8_t crc8(uint8_t* u8data_ptr, uint8_t u8length)
+uint8_t crc8(uint8_t* u8data_ptr, uint16_t u16length)
 {
-	uint8_t u8crc,i,j,u8temp,u8inByte;
+	uint8_t u8crc,j,u8temp,u8inByte;
+	uint16_t i;
 
 	u8crc = 0;
 
-	for(i=0;i<u8length;i++)
+	for(i=0;i<u16length;i++)
 	{
 		u8inByte = u8data_ptr[i];
 		for(j=0;j<8;j++)
@@ -32,37 +33,41 @@ uint8_t crc8(uint8_t* u8data_ptr, uint8_t u8length)
 }
 
 
-uint8_t sup_get_packet(uint8_t* u8packet_ptr, uint8_t* u8rawData_ptr, uint8_t u8rawLength, uint8_t u8dataType)
+int8_t sup_get_packet(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawLength)
 {
-    *u8packet_ptr = ((u8dataType&0x03)<<6) | (u8rawLength&0x3F);
-    memcpy(u8packet_ptr+1,u8rawData_ptr,u8rawLength);
-    *(u8packet_ptr+u8rawLength+1) = crc8(u8packet_ptr,u8rawLength+1);
-    
-    return u8rawLength + 2;
+    if((u16rawLength<SUP_MIN_LENGTH) || (u16rawLength > SUP_MAX_LENGTH))
+    {
+    	return -1;
+    }
+
+	*u8packet_ptr = u16rawLength-1;
+    memcpy(u8packet_ptr+1,u8rawData_ptr,u16rawLength);
+    *(u8packet_ptr+u16rawLength+1) = crc8(u8packet_ptr,u16rawLength+1);
+    *u16packetLength_ptr = u16rawLength + 2;
+    return 0;
 }
 
 
-int8_t sup_unpackage(uint8_t* u8data_ptr, uint8_t* u8dataLength_ptr, uint8_t* u8dataType_ptr, uint8_t* u8package_ptr, uint8_t u8packageLength)
+int8_t sup_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8package_ptr, uint16_t u16packageLength)
 {
-    if(crc8(u8package_ptr,u8packageLength) != 0)
+    if(crc8(u8package_ptr,u16packageLength) != 0)
     {
         return -1;
     }
     
-    if(((u8package_ptr[0]&0x3F)+2) != u8packageLength)
+    if((((uint16_t)u8package_ptr[0])+3) != u16packageLength)
     {
         return -2;
     }
-    *u8dataType_ptr = (u8package_ptr[0]>>6)&0x03;
-    *u8dataLength_ptr = u8packageLength-2;
-    
-    memcpy(u8data_ptr,u8package_ptr+1,u8packageLength-2);
+
+    *u16dataLength_ptr = u16packageLength-2;
+    memcpy(u8data_ptr,u8package_ptr+1,u16packageLength-2);
     
     return 0;
 }
 
 
-uint8_t sup_stuff(uint8_t* u8stuffed_ptr, uint8_t* u8data_ptr, uint8_t u8dataLength)
+int8_t sup_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_ptr, uint8_t* u8data_ptr, uint16_t u16dataLength)
 {
     uint16_t u16dataBitCounter,u16destBitCounter,u16dataMaxBit,u16consecutiveOnes;
     
@@ -71,7 +76,7 @@ uint8_t sup_stuff(uint8_t* u8stuffed_ptr, uint8_t* u8data_ptr, uint8_t u8dataLen
     u16dataBitCounter = 0;
     u16destBitCounter = 0;
     u16consecutiveOnes = 0;
-    u16dataMaxBit = ((uint16_t)u8dataLength)*8;
+    u16dataMaxBit = (u16dataLength)*8;
     
     while(u16dataBitCounter < u16dataMaxBit)
     {
@@ -105,30 +110,31 @@ uint8_t sup_stuff(uint8_t* u8stuffed_ptr, uint8_t* u8data_ptr, uint8_t u8dataLen
     }
     
     u8stuffed_ptr[u16destBitCounter/8+1] = 0x7E; //delimiter
-    return u16destBitCounter/8+2; //return stuffed length
+    *u16stuffedLength_ptr = u16destBitCounter/8+2; //stuffed length
+    return 0;
 }
 
 
-int8_t sup_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u8stuffedLength)
+int8_t sup_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8stuffed_ptr, uint16_t u16stuffedLength)
 {
     uint16_t u16consecutiveOnes, u16dataBitCounter, u16stuffedBitCounter, u16stuffedBitMax, u16stuffBitCount;
     
     if(u8stuffed_ptr[0]==0x7E)
     {
         u8stuffed_ptr++;
-        u8stuffedLength--;
+        u16stuffedLength--;
         
-        if(u8stuffedLength == 0)
+        if(u16stuffedLength == 0)
         {
             return -2;
         }
     }
     
-    if(u8stuffed_ptr[u8stuffedLength-1] == 0x7E)
+    if(u8stuffed_ptr[u16stuffedLength-1] == 0x7E)
     {
-        u8stuffedLength--;
+    	u16stuffedLength--;
         
-        if(u8stuffedLength == 0)
+        if(u16stuffedLength == 0)
         {
             return -2;
         }
@@ -138,7 +144,7 @@ int8_t sup_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u8stuffe
     u16dataBitCounter = 0;
     u16stuffedBitCounter = 0;
     u16stuffBitCount = 0;
-    u16stuffedBitMax = (uint16_t)u8stuffedLength*8;
+    u16stuffedBitMax = u16stuffedLength*8;
     
     while(u16stuffedBitCounter<u16stuffedBitMax)
     {
@@ -170,38 +176,54 @@ int8_t sup_unstuff(uint8_t* u8data_ptr, uint8_t* u8stuffed_ptr, uint8_t u8stuffe
             u16stuffedBitCounter++;
         }
     }
-    return (int8_t)(u8stuffedLength - ((u16stuffBitCount+7)/8));
+    *u16dataLength_ptr = u16stuffedLength - ((u16stuffBitCount+7)/8);
+    return 0;
 }
 
 
 
-void sup_send(uint8_t u8dataType, uint8_t* u8dataToSend_ptr, uint8_t u8length)
+int8_t sup_send(uint8_t* u8dataToSend_ptr, uint16_t u16length)
 {
-    uint8_t u8stuffedLength,u8protLength;
-    uint8_t au8temp[80];
+    uint16_t u16stuffedLength,u16packetLength;
+    int8_t s8retVal;
+    uint8_t au8packet[SUP_BUFFER_SIZE];
     
-    u8protLength = sup_get_packet(au8temp,u8dataToSend_ptr,u8length,u8dataType);
-    u8stuffedLength = sup_stuff(au8sendBuffer,au8temp,u8protLength);
-    usartDMASend(au8sendBuffer,u8stuffedLength);
-}
-
-
-int8_t sup_receive(uint8_t* u8dataType_ptr, uint8_t* u8data_ptr, uint8_t* u8dataLength_ptr, uint8_t* u8rawData_ptr, uint8_t u8rawDataLength)
-{
-    int8_t s8unstuffedLength,s8retVal;
-    
-    uint8_t au8temp[80];
-    
-    s8unstuffedLength = sup_unstuff(&au8temp[0],u8rawData_ptr,u8rawDataLength);
-    if((s8unstuffedLength < 2) || (s8unstuffedLength > 65)) //minimum length: 2 (opcode and crc). also: negative numbers are also errors
+    s8retVal = sup_get_packet(au8packet,&u16packetLength,u8dataToSend_ptr,u16length);
+    if(s8retVal)
     {
-        return -1;
+    	return -1;
     }
+    s8retVal = sup_stuff(au8sendBuffer,&u16stuffedLength,au8packet,u16packetLength);
+    if(s8retVal)
+	{
+		return -2;
+	}
+    usartDMASend(au8sendBuffer,u16stuffedLength);
+    return 0;
+}
+
+
+int8_t sup_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawDataLength)
+{
+    int8_t s8retVal;
+    uint16_t u16packetLength;
     
-    s8retVal = sup_unpackage(u8data_ptr,u8dataLength_ptr,u8dataType_ptr,&au8temp[0],(uint8_t)s8unstuffedLength);
-    if(s8retVal != 0)
+    uint8_t au8packet[SUP_BUFFER_SIZE];
+    
+    s8retVal = sup_unstuff(au8packet,&u16packetLength,u8rawData_ptr,u16rawDataLength);
+    if(s8retVal)
+    {
+    	return -1;
+    }
+    if((u16packetLength < SUP_MIN_LENGTH+2) || (u16packetLength > SUP_MAX_LENGTH+2))
     {
         return -2;
+    }
+    
+    s8retVal = sup_unpackage(u8data_ptr,u16dataLength_ptr,au8packet,u16packetLength);
+    if(s8retVal)
+    {
+        return -3;
     }
     return 0;
 }
