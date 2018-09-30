@@ -38,8 +38,8 @@ SOFTWARE.
 int main(void)
 {
 	RingBuff_t* RingBuffer_ptr;
-	uint8_t au8rawData[80];
-	uint8_t au8data[80];
+	uint8_t au8rawData[SUP_BUFFER_SIZE];
+	uint8_t au8data[SUP_MAX_LENGTH];
 	uint16_t u16rawDataLength,u16dataLength;
 	int8_t s8retVal;
 
@@ -81,12 +81,98 @@ int main(void)
 	{
 		if(RingBuffer_CountData(RingBuffer_ptr,0x7E))
 		{
-			u16rawDataLength = RingBuffer_RemoveUntilDelimiter(RingBuffer_ptr,au8rawData,80,0x7E);
+			u16rawDataLength = RingBuffer_RemoveUntilDelimiter(RingBuffer_ptr,au8rawData,SUP_BUFFER_SIZE,0x7E);
 			s8retVal = sup_receive(au8data,&u16dataLength,au8rawData,u16rawDataLength);
 			if(s8retVal == 0)
 			{
-				while(sup_send_busy());
-				sup_send(au8data,u16dataLength);
+				switch(au8data[0])
+				{
+				case WRITE_SYS:
+
+				break;
+
+				case WRITE_SYS_REPLY:
+
+				break;
+
+				case READ_SYS:
+
+				break;
+
+				case READ_SYS_REPLY:
+
+				break;
+
+				case WRITE_DATA:
+
+				break;
+
+				case WRITE_DATA_REPLY:
+
+				break;
+
+				case READ_DATA:
+
+				break;
+
+				case READ_DATA_REPLY:
+
+				break;
+
+				case SETUP_JOB:
+
+				break;
+
+				case SETUP_JOB_REPLY:
+
+				break;
+
+				case CHANGE_JOB:
+
+				break;
+
+				case CHANGE_JOB_REPLY:
+
+				break;
+
+				case DELETE_JOB:
+
+				break;
+
+				case DELETE_JOB_REPLY:
+
+				break;
+
+				case GET_JOB:
+
+				break;
+
+				case GET_JOB_REPLY:
+
+				break;
+
+				case START_JOB:
+
+				break;
+
+				case START_JOB_REPLY:
+
+				break;
+
+				case STOP_JOB:
+
+				break;
+
+				case STOP_JOB_REPLY:
+
+				break;
+
+				case JOB_DATA:
+
+				break;
+				}
+//				while(sup_send_busy());
+//				sup_send(au8data,u16dataLength);
 			}
 		}
 		GPIOC->ODR ^= GPIO_ODR_ODR13;

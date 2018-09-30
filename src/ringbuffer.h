@@ -225,7 +225,6 @@
         RingBuff_Data_t tempData;
         RingBuff_Count_t offset = 0;
         
-        
         while(1)
         {
             if(offset == DestinationLength)
