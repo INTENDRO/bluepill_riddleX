@@ -89,6 +89,8 @@ int main(void)
 				sup_send(au8data,u16dataLength);
 			}
 		}
+		GPIOC->ODR ^= GPIO_ODR_ODR13;
+		wait_1ms(100);
 	}
 }
 
