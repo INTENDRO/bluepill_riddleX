@@ -40,7 +40,7 @@ int main(void)
 	RingBuff_t* RingBuffer_ptr;
 	uint8_t au8rawData[SUP_BUFFER_SIZE];
 	uint8_t au8data[SUP_MAX_LENGTH];
-	uint16_t u16rawDataLength,u16dataLength;
+	uint16_t u16rawDataLength,u16dataLength,u16temp;
 	int8_t s8retVal;
 
 
@@ -73,6 +73,10 @@ int main(void)
 	sup_send_busy();
 	*/
 
+	au8data[0] = 0x3f;
+	au8data[1] = 0x86;
+
+	u16temp = crc16(au8data,1);
 
 	__enable_irq();
 

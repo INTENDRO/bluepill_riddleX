@@ -32,6 +32,31 @@ uint8_t crc8(uint8_t* u8data_ptr, uint16_t u16length)
 	return u8crc;
 }
 
+uint16_t crc16(uint8_t* u8data_ptr, uint16_t u16length)
+{
+	uint8_t j;
+	uint16_t i,u16crc,u16temp,u16inByte;
+
+	u16crc = 0xFFFF;
+
+	for(i=0;i<u16length;i++)
+	{
+		u16inByte = (uint16_t)(u8data_ptr[i]);
+		for(j=0;j<8;j++)
+		{
+			u16temp = (u16crc^u16inByte)&0x0001;
+			u16crc >>= 1;
+			if(u16temp)
+			{
+				u16crc ^= 0x8408;
+			}
+			u16inByte>>=1;
+		}
+	}
+
+	return u16crc;
+}
+
 
 int8_t sup_get_packet(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawLength)
 {
