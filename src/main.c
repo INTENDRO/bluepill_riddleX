@@ -73,10 +73,17 @@ int main(void)
 	sup_send_busy();
 	*/
 
-	au8data[0] = 0x3f;
-	au8data[1] = 0x86;
+//	au8data[0] = 0x3f;
+//	au8data[1] = 0x89;
+//
+//	u16temp = crc16(au8data,2);
 
-	u16temp = crc16(au8data,1);
+
+//	au8rawData[0] = 0x3f;
+//	au8rawData[1] = 0x89;
+//	s8retVal = sup_get_packet(au8data,&u16dataLength,au8rawData,2);
+//	s8retVal = sup_unpackage(au8rawData,&u16rawDataLength,au8data,u16dataLength);
+
 
 	__enable_irq();
 
@@ -175,12 +182,12 @@ int main(void)
 
 				break;
 				}
-//				while(sup_send_busy());
-//				sup_send(au8data,u16dataLength);
+				while(sup_send_busy());
+				sup_send(au8data,u16dataLength);
 			}
 		}
-		GPIOC->ODR ^= GPIO_ODR_ODR13;
-		wait_1ms(100);
+//		GPIOC->ODR ^= GPIO_ODR_ODR13;
+//		wait_1ms(100);
 	}
 }
 
