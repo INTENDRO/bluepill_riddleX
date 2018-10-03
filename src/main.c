@@ -27,11 +27,19 @@ SOFTWARE.
 ******************************************************************************
 */
 
+/*
+ * TO DO:
+ * - hide all functions in the sup_ll_driver
+ * - crc8 / crc16
+ */
+
 /* Includes */
+
 #include "stm32f10x.h"
 #include "ringbuffer.h"
 #include "utils.h"
 #include "usart.h"
+#include "sup_ll_driver.h"
 #include "sup.h"
 
 
@@ -42,6 +50,7 @@ int main(void)
 	uint8_t au8data[SUP_MAX_LENGTH];
 	uint16_t u16rawDataLength,u16dataLength,u16temp;
 	int8_t s8retVal;
+
 
 
 	SystemInit();
@@ -57,6 +66,9 @@ int main(void)
 	usartClearFlagsAndBuffer();
 	wait_1ms(100);
 	RingBuffer_ptr = usartGetRingBuffPointer();
+
+	init_module();
+
 	/*
 	au8data[0] = 0x12;
 	au8data[1] = 0x34;
