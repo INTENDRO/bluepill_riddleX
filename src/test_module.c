@@ -28,3 +28,9 @@ void init_module(void)
 	sup_init_module(0,&test_module);
 
 }
+
+void test_func(void)
+{
+	u8reg_control_value = 3;
+}
+

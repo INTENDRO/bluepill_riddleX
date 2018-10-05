@@ -6,8 +6,15 @@
 
 static uint8_t au8sendBuffer[SUP_BUFFER_SIZE];
 
+static uint8_t sup_ll_crc8(uint8_t* u8data_ptr, uint16_t u16length);
+static uint16_t sup_ll_crc16(uint8_t* u8data_ptr, uint16_t u16length);
+static int8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawLength);
+static int8_t sup_ll_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_ptr, uint8_t* u8data_ptr, uint16_t u16dataLength);
+static int8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8stuffed_ptr, uint16_t u16stuffedLength);
+static int8_t sup_ll_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8package_ptr, uint16_t u16packageLength);
 
-uint8_t crc8(uint8_t* u8data_ptr, uint16_t u16length)
+
+static uint8_t sup_ll_crc8(uint8_t* u8data_ptr, uint16_t u16length)
 {
 	uint8_t u8crc,j,u8temp,u8inByte;
 	uint16_t i;
@@ -32,7 +39,7 @@ uint8_t crc8(uint8_t* u8data_ptr, uint16_t u16length)
 	return u8crc;
 }
 
-uint16_t crc16(uint8_t* u8data_ptr, uint16_t u16length)
+static uint16_t sup_ll_crc16(uint8_t* u8data_ptr, uint16_t u16length)
 {
 	uint8_t j;
 	uint16_t i,u16crc,u16temp,u16inByte;
@@ -58,7 +65,7 @@ uint16_t crc16(uint8_t* u8data_ptr, uint16_t u16length)
 }
 
 
-int8_t sup_get_packet(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawLength)
+static int8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawLength)
 {
     uint16_t u16crc;
 
@@ -69,7 +76,7 @@ int8_t sup_get_packet(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint
 
 	*u8packet_ptr = u16rawLength-1;
     memcpy(u8packet_ptr+1,u8rawData_ptr,u16rawLength);
-    u16crc = crc16(u8packet_ptr,u16rawLength+1);
+    u16crc = sup_ll_crc16(u8packet_ptr,u16rawLength+1);
 	*(u8packet_ptr+u16rawLength+1) = (uint8_t)u16crc;
     *(u8packet_ptr+u16rawLength+2) = (uint8_t)(u16crc>>8);
     *u16packetLength_ptr = u16rawLength + 3;
@@ -77,9 +84,9 @@ int8_t sup_get_packet(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint
 }
 
 
-int8_t sup_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8package_ptr, uint16_t u16packageLength)
+static int8_t sup_ll_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8package_ptr, uint16_t u16packageLength)
 {
-    if(crc16(u8package_ptr,u16packageLength))
+    if(sup_ll_crc16(u8package_ptr,u16packageLength))
     {
         return -1;
     }
@@ -96,7 +103,7 @@ int8_t sup_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* 
 }
 
 
-int8_t sup_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_ptr, uint8_t* u8data_ptr, uint16_t u16dataLength)
+static int8_t sup_ll_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_ptr, uint8_t* u8data_ptr, uint16_t u16dataLength)
 {
     uint16_t u16dataBitCounter,u16destBitCounter,u16dataMaxBit,u16consecutiveOnes;
     
@@ -144,7 +151,7 @@ int8_t sup_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_ptr, uint8_t
 }
 
 
-int8_t sup_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8stuffed_ptr, uint16_t u16stuffedLength)
+static int8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8stuffed_ptr, uint16_t u16stuffedLength)
 {
     uint16_t u16consecutiveOnes, u16dataBitCounter, u16stuffedBitCounter, u16stuffedBitMax, u16stuffBitCount;
     
@@ -211,18 +218,18 @@ int8_t sup_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8
 
 
 
-int8_t sup_send(uint8_t* u8dataToSend_ptr, uint16_t u16length)
+int8_t sup_ll_send(uint8_t* u8dataToSend_ptr, uint16_t u16length)
 {
     uint16_t u16stuffedLength,u16packetLength;
     int8_t s8retVal;
     uint8_t au8packet[SUP_BUFFER_SIZE];
     
-    s8retVal = sup_get_packet(au8packet,&u16packetLength,u8dataToSend_ptr,u16length);
+    s8retVal = sup_ll_package(au8packet,&u16packetLength,u8dataToSend_ptr,u16length);
     if(s8retVal)
     {
     	return -1;
     }
-    s8retVal = sup_stuff(au8sendBuffer,&u16stuffedLength,au8packet,u16packetLength);
+    s8retVal = sup_ll_stuff(au8sendBuffer,&u16stuffedLength,au8packet,u16packetLength);
     if(s8retVal)
 	{
 		return -2;
@@ -232,14 +239,14 @@ int8_t sup_send(uint8_t* u8dataToSend_ptr, uint16_t u16length)
 }
 
 
-int8_t sup_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawDataLength)
+int8_t sup_ll_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawDataLength)
 {
     int8_t s8retVal;
     uint16_t u16packetLength;
     
     uint8_t au8packet[SUP_BUFFER_SIZE];
     
-    s8retVal = sup_unstuff(au8packet,&u16packetLength,u8rawData_ptr,u16rawDataLength);
+    s8retVal = sup_ll_unstuff(au8packet,&u16packetLength,u8rawData_ptr,u16rawDataLength);
     if(s8retVal)
     {
     	return -1;
@@ -249,7 +256,7 @@ int8_t sup_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8
         return -2;
     }
     
-    s8retVal = sup_unpackage(u8data_ptr,u16dataLength_ptr,au8packet,u16packetLength);
+    s8retVal = sup_ll_unpackage(u8data_ptr,u16dataLength_ptr,au8packet,u16packetLength);
     if(s8retVal)
     {
         return -3;
@@ -257,7 +264,7 @@ int8_t sup_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8
     return 0;
 }
 
-uint8_t sup_send_busy(void)
+uint8_t sup_ll_send_isbusy(void)
 {
     return usartBusy();
 }

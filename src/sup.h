@@ -31,17 +31,40 @@ typedef enum
 
 typedef struct
 {
-	void* data;
-	uint8_t properties;
-	uint8_t type;
+	void* const data;
+	const uint8_t properties;
+	const uint8_t type;
 } sup_register_t;
 
 
 typedef struct
 {
-	sup_register_t** reg_array;
-	uint8_t reg_count;
+	sup_register_t** const reg_array;
+	const uint8_t reg_count;
 } sup_module_t;
+
+
+#define WRITE_SYS			0x00
+#define WRITE_SYS_REPLY		0x01
+#define READ_SYS			0x02
+#define READ_SYS_REPLY		0x03
+#define WRITE_DATA			0x04
+#define WRITE_DATA_REPLY	0x05
+#define READ_DATA			0x06
+#define READ_DATA_REPLY		0x07
+#define SETUP_JOB			0x08
+#define SETUP_JOB_REPLY		0x09
+#define CHANGE_JOB			0x0A
+#define CHANGE_JOB_REPLY	0x0B
+#define DELETE_JOB			0x0C
+#define DELETE_JOB_REPLY	0x0D
+#define GET_JOB				0x0E
+#define GET_JOB_REPLY		0x0F
+#define START_JOB			0x10
+#define START_JOB_REPLY		0x11
+#define STOP_JOB			0x12
+#define STOP_JOB_REPLY		0x13
+#define JOB_DATA			0x14
 
 
 int8_t sup_init_module(uint8_t module_nr,sup_module_t* module);

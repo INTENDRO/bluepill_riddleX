@@ -15,6 +15,7 @@ static sup_module_t* module_array[SUP_MAX_MODULE_COUNT] = {0};
 int8_t sup_init_module(uint8_t module_nr,sup_module_t* module)
 {
 	module_array[module_nr] = module;
+	return 0;
 }
 
 int8_t sup_get_properties(uint8_t* pu8properties, uint8_t u8module_nr, uint8_t u8reg_nr)
@@ -61,3 +62,5 @@ int8_t sup_get_type(uint8_t* pu8type, uint8_t u8module_nr, uint8_t u8reg_nr)
 
 	return 0;
 }
+
+

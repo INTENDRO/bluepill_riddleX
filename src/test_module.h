@@ -10,5 +10,6 @@
 
 
 void init_module(void);
+void test_func(void);
 
 #endif /* TEST_MODULE_H_ */

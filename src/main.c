@@ -29,8 +29,10 @@ SOFTWARE.
 
 /*
  * TO DO:
- * - hide all functions in the sup_ll_driver
+ * - get packet and give it to the sup driver. this one will then use the low level driver to decode it. afterwards, the sup driver needs to handle the command and write or read the corresponding register
  * - crc8 / crc16
+ * - define error codes in header files
+ * - possibility: sw interrupt when separator has been received -> no check required in main loop!
  */
 
 /* Includes */
@@ -81,6 +83,7 @@ int main(void)
 	s8retVal = sup_get_type(&u8temp,1,0);
 
 
+
 	/*
 	au8data[0] = 0x12;
 	au8data[1] = 0x34;
@@ -97,16 +100,7 @@ int main(void)
 	sup_send_busy();
 	*/
 
-//	au8data[0] = 0x3f;
-//	au8data[1] = 0x89;
-//
-//	u16temp = crc16(au8data,2);
 
-
-//	au8rawData[0] = 0x3f;
-//	au8rawData[1] = 0x89;
-//	s8retVal = sup_get_packet(au8data,&u16dataLength,au8rawData,2);
-//	s8retVal = sup_unpackage(au8rawData,&u16rawDataLength,au8data,u16dataLength);
 
 
 	__enable_irq();
@@ -117,7 +111,7 @@ int main(void)
 		if(RingBuffer_CountData(RingBuffer_ptr,0x7E))
 		{
 			u16rawDataLength = RingBuffer_RemoveUntilDelimiter(RingBuffer_ptr,au8rawData,SUP_BUFFER_SIZE,0x7E);
-			s8retVal = sup_receive(au8data,&u16dataLength,au8rawData,u16rawDataLength);
+			s8retVal = sup_ll_receive(au8data,&u16dataLength,au8rawData,u16rawDataLength);
 			if(s8retVal == 0)
 			{
 				switch(au8data[0])
@@ -206,8 +200,8 @@ int main(void)
 
 				break;
 				}
-				while(sup_send_busy());
-				sup_send(au8data,u16dataLength);
+				while(sup_ll_send_isbusy());
+				sup_ll_send(au8data,u16dataLength);
 			}
 		}
 //		GPIOC->ODR ^= GPIO_ODR_ODR13;
