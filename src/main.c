@@ -41,6 +41,7 @@ SOFTWARE.
 #include "usart.h"
 #include "sup_ll_driver.h"
 #include "sup.h"
+#include "test_module.h"
 
 
 int main(void)
@@ -50,6 +51,7 @@ int main(void)
 	uint8_t au8data[SUP_MAX_LENGTH];
 	uint16_t u16rawDataLength,u16dataLength,u16temp;
 	int8_t s8retVal;
+	uint8_t u8temp;
 
 
 
@@ -68,6 +70,12 @@ int main(void)
 	RingBuffer_ptr = usartGetRingBuffPointer();
 
 	init_module();
+	s8retVal = sup_get_properties(&u8temp,0,0);
+	s8retVal = sup_get_properties(&u8temp,0,1);
+	s8retVal = sup_get_properties(&u8temp,0,2);
+	s8retVal = sup_get_properties(&u8temp,1,0);
+
+
 
 	/*
 	au8data[0] = 0x12;

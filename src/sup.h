@@ -36,6 +36,7 @@ typedef struct
 	uint8_t type;
 } sup_register_t;
 
+
 typedef struct
 {
 	sup_register_t** reg_array;
@@ -43,7 +44,8 @@ typedef struct
 } sup_module_t;
 
 
-int8_t sup_init_module(uint8_t module_nr,sup_module_t module);
+int8_t sup_init_module(uint8_t module_nr,sup_module_t* module);
+int8_t sup_get_properties(uint8_t* pu8properties, uint8_t u8module_nr, uint8_t u8reg_nr);
 
 
 #endif /* SUP_H_ */
