@@ -75,6 +75,10 @@ int main(void)
 	s8retVal = sup_get_properties(&u8temp,0,2);
 	s8retVal = sup_get_properties(&u8temp,1,0);
 
+	s8retVal = sup_get_type(&u8temp,0,0);
+	s8retVal = sup_get_type(&u8temp,0,1);
+	s8retVal = sup_get_type(&u8temp,0,2);
+	s8retVal = sup_get_type(&u8temp,1,0);
 
 
 	/*

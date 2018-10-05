@@ -47,9 +47,14 @@ int8_t sup_get_type(uint8_t* pu8type, uint8_t u8module_nr, uint8_t u8reg_nr)
 		return -1;
 	}
 
-	if(u8reg_nr >= module_array[u8module_nr]->reg_count)
+	if(module_array[u8module_nr] == 0)
 	{
 		return -2;
+	}
+
+	if(u8reg_nr >= module_array[u8module_nr]->reg_count)
+	{
+		return -3;
 	}
 
 	*pu8type = module_array[u8module_nr]->reg_array[u8reg_nr]->type;
