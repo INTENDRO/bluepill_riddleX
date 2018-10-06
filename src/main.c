@@ -29,11 +29,10 @@ SOFTWARE.
 
 /*
  * TO DO:
- * - get packet and give it to the sup driver. this one will then use the low level driver to decode it. afterwards, the sup driver needs to handle the command and write or read the corresponding register
- * - crc8 / crc16
+ * - crc8 / crc16 (check if crc8 does not produce any errors)
  * - use a timeout while waiting for usart to be available (systick maybe?)
  * - define error codes in header files
- * - put usart in sup -> basically not needed in the main loop
+ * - put usart init in sup -> usart should not be accessed in the main file
  * - sup receive function: send and receive can return the same errorcodes for different errors -> generate a unique error table (defines)
  * - possibility: sw interrupt when separator has been received -> no check required in main loop
  * - use a ringbuffer as the send buffer for sup packets. the buffer can be appended with a new command during the transmission of another one. this way the usart does not havt to wait for the calculation of the packets
@@ -45,7 +44,6 @@ SOFTWARE.
 #include "ringbuffer.h"
 #include "utils.h"
 #include "usart.h"
-//#include "sup_ll_driver.h"
 #include "sup.h"
 #include "test_module.h"
 
