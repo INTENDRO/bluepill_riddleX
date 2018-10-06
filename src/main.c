@@ -47,6 +47,17 @@ SOFTWARE.
 #include "sup.h"
 #include "test_module.h"
 
+uint32_t u32sysTickCounter = 0;
+
+void SysTick_Handler(void)
+{
+	u32sysTickCounter++;
+	if(u32sysTickCounter == 500)
+	{
+		u32sysTickCounter = 0;
+		GPIOC->ODR ^= GPIO_ODR_ODR13;
+	}
+}
 
 int main(void)
 {
@@ -58,6 +69,7 @@ int main(void)
 
 
 	SystemInit();
+	u8temp = SysTick_Config(SystemCoreClock/1000); //set the systick to 1ms
 
 	RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 
