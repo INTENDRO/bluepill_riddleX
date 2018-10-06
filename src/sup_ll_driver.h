@@ -7,7 +7,7 @@
 #define SUP_LL_MIN_LENGTH 1
 
 
-#define SUP_LL_CRC8
+//#define SUP_LL_CRC8
 
 
 

@@ -29,9 +29,9 @@ SOFTWARE.
 
 /*
  * TO DO:
- * - crc8 / crc16 (check if crc8 does not produce any errors)
  * - use a timeout while waiting for usart to be available (systick maybe?)
  * - define error codes in header files
+ * - use the crc hw
  * - put usart init in sup -> usart should not be accessed in the main file
  * - sup receive function: send and receive can return the same errorcodes for different errors -> generate a unique error table (defines)
  * - possibility: sw interrupt when separator has been received -> no check required in main loop

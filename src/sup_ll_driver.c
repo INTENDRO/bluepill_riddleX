@@ -109,24 +109,27 @@ static int8_t sup_ll_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr,
     {
         return -1;
     }
+
+	if((((uint16_t)u8package_ptr[0])+3) != u16packageLength)
+	{
+		return -2;
+	}
+
+	*u16dataLength_ptr = u16packageLength-2;
+	memcpy(u8data_ptr,u8package_ptr+1,u16packageLength-2);
 #else
 	if(sup_ll_crc16(u8package_ptr,u16packageLength))
 	{
 		return -1;
 	}
-#endif
-    
-    if((((uint16_t)u8package_ptr[0])+4) != u16packageLength)
-    {
-        return -2;
-    }
 
-#ifdef SUP_LL_CRC8
-    *u16dataLength_ptr = u16packageLength-2;
-    memcpy(u8data_ptr,u8package_ptr+1,u16packageLength-2);
-#else
-    *u16dataLength_ptr = u16packageLength-3;
-    memcpy(u8data_ptr,u8package_ptr+1,u16packageLength-3);
+	if((((uint16_t)u8package_ptr[0])+4) != u16packageLength)
+	{
+		return -2;
+	}
+
+	*u16dataLength_ptr = u16packageLength-3;
+	memcpy(u8data_ptr,u8package_ptr+1,u16packageLength-3);
 #endif
     
     return 0;
