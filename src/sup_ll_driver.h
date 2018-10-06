@@ -7,6 +7,9 @@
 #define SUP_LL_MIN_LENGTH 1
 
 
+#define SUP_LL_CRC8
+
+
 
 int8_t sup_ll_send(uint8_t* u8dataToSend_ptr, uint16_t u16length);
 int8_t sup_ll_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawDataLength);

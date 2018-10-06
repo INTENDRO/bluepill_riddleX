@@ -21,8 +21,6 @@ static sup_module_t test_module = {reg_array,2};
 
 
 
-
-
 void init_module(void)
 {
 	sup_init_module(0,&test_module);

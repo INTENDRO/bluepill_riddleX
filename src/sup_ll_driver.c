@@ -6,14 +6,18 @@
 
 static uint8_t au8sendBuffer[SUP_LL_BUFFER_SIZE];
 
+#ifdef SUP_LL_CRC8
 static uint8_t sup_ll_crc8(uint8_t* u8data_ptr, uint16_t u16length);
+#else
 static uint16_t sup_ll_crc16(uint8_t* u8data_ptr, uint16_t u16length);
+#endif
+
 static int8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawLength);
 static int8_t sup_ll_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_ptr, uint8_t* u8data_ptr, uint16_t u16dataLength);
 static int8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8stuffed_ptr, uint16_t u16stuffedLength);
 static int8_t sup_ll_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8package_ptr, uint16_t u16packageLength);
 
-
+#ifdef SUP_LL_CRC8
 static uint8_t sup_ll_crc8(uint8_t* u8data_ptr, uint16_t u16length)
 {
 	uint8_t u8crc,j,u8temp,u8inByte;
@@ -39,6 +43,8 @@ static uint8_t sup_ll_crc8(uint8_t* u8data_ptr, uint16_t u16length)
 	return u8crc;
 }
 
+#else
+
 static uint16_t sup_ll_crc16(uint8_t* u8data_ptr, uint16_t u16length)
 {
 	uint8_t j;
@@ -63,11 +69,16 @@ static uint16_t sup_ll_crc16(uint8_t* u8data_ptr, uint16_t u16length)
 
 	return u16crc;
 }
+#endif
 
 
 static int8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawLength)
 {
-    uint16_t u16crc;
+#ifdef SUP_LL_CRC8
+	uint8_t u8crc;
+#else
+	uint16_t u16crc;
+#endif
 
 	if((u16rawLength<SUP_LL_MIN_LENGTH) || (u16rawLength > SUP_LL_MAX_LENGTH))
     {
@@ -76,28 +87,47 @@ static int8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_pt
 
 	*u8packet_ptr = u16rawLength-1;
     memcpy(u8packet_ptr+1,u8rawData_ptr,u16rawLength);
+
+#ifdef SUP_LL_CRC8
+    u8crc = sup_ll_crc8(u8packet_ptr,u16rawLength+1);
+	*(u8packet_ptr+u16rawLength+1) = u8crc;
+    *u16packetLength_ptr = u16rawLength + 2;
+#else
     u16crc = sup_ll_crc16(u8packet_ptr,u16rawLength+1);
 	*(u8packet_ptr+u16rawLength+1) = (uint8_t)u16crc;
-    *(u8packet_ptr+u16rawLength+2) = (uint8_t)(u16crc>>8);
-    *u16packetLength_ptr = u16rawLength + 3;
+	*(u8packet_ptr+u16rawLength+2) = (uint8_t)(u16crc>>8);
+	*u16packetLength_ptr = u16rawLength + 3;
+#endif
     return 0;
 }
 
 
 static int8_t sup_ll_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8package_ptr, uint16_t u16packageLength)
 {
-    if(sup_ll_crc16(u8package_ptr,u16packageLength))
+#ifdef SUP_LL_CRC8
+	if(sup_ll_crc8(u8package_ptr,u16packageLength))
     {
         return -1;
     }
+#else
+	if(sup_ll_crc16(u8package_ptr,u16packageLength))
+	{
+		return -1;
+	}
+#endif
     
     if((((uint16_t)u8package_ptr[0])+4) != u16packageLength)
     {
         return -2;
     }
 
+#ifdef SUP_LL_CRC8
+    *u16dataLength_ptr = u16packageLength-2;
+    memcpy(u8data_ptr,u8package_ptr+1,u16packageLength-2);
+#else
     *u16dataLength_ptr = u16packageLength-3;
     memcpy(u8data_ptr,u8package_ptr+1,u16packageLength-3);
+#endif
     
     return 0;
 }

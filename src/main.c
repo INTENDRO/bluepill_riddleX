@@ -57,7 +57,6 @@ int main(void)
 	uint8_t u8temp;
 
 
-
 	SystemInit();
 
 	RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
@@ -94,15 +93,13 @@ int main(void)
 	sup_send_busy();
 	*/
 
+
 	/*
 	au8data[0] = 0xFF;
 	sup_send_busy();
 	sup_send(0x0,au8data,0x01);
 	sup_send_busy();
 	*/
-
-
-
 
 	__enable_irq();
 
