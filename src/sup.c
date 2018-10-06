@@ -12,7 +12,6 @@
 static sup_module_t* module_array[SUP_MAX_MODULE_COUNT] = {0};
 
 
-
 int8_t sup_init_module(uint8_t module_nr,sup_module_t* module)
 {
 	module_array[module_nr] = module;
@@ -74,8 +73,107 @@ uint8_t sup_send_isbusy(void)
     return sup_ll_send_isbusy();
 }
 
-int8_t sup_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawDataLength)
+int8_t sup_receive(uint8_t* u8rawData_ptr, uint16_t u16rawDataLength)
 {
-	return sup_ll_receive(u8data_ptr,u16dataLength_ptr,u8rawData_ptr,u16rawDataLength);
+	int8_t s8retVal;
+	uint8_t au8data[SUP_MAX_LENGTH];
+	uint16_t u16dataLength;
+
+
+	s8retVal = sup_ll_receive(au8data,&u16dataLength,u8rawData_ptr,u16rawDataLength);
+
+	if(s8retVal == 0)
+	{
+		switch(au8data[0])
+		{
+		case WRITE_SYS:
+
+		break;
+
+		case WRITE_SYS_REPLY:
+
+		break;
+
+		case READ_SYS:
+
+		break;
+
+		case READ_SYS_REPLY:
+
+		break;
+
+		case WRITE_DATA:
+
+		break;
+
+		case WRITE_DATA_REPLY:
+
+		break;
+
+		case READ_DATA:
+
+		break;
+
+		case READ_DATA_REPLY:
+
+		break;
+
+		case SETUP_JOB:
+
+		break;
+
+		case SETUP_JOB_REPLY:
+
+		break;
+
+		case CHANGE_JOB:
+
+		break;
+
+		case CHANGE_JOB_REPLY:
+
+		break;
+
+		case DELETE_JOB:
+
+		break;
+
+		case DELETE_JOB_REPLY:
+
+		break;
+
+		case GET_JOB:
+
+		break;
+
+		case GET_JOB_REPLY:
+
+		break;
+
+		case START_JOB:
+
+		break;
+
+		case START_JOB_REPLY:
+
+		break;
+
+		case STOP_JOB:
+
+		break;
+
+		case STOP_JOB_REPLY:
+
+		break;
+
+		case JOB_DATA:
+
+		break;
+		}
+		while(sup_send_isbusy());
+		s8retVal = sup_send(au8data,u16dataLength);
+		return s8retVal;
+	}
+	return s8retVal;
 }
 

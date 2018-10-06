@@ -31,8 +31,10 @@ SOFTWARE.
  * TO DO:
  * - get packet and give it to the sup driver. this one will then use the low level driver to decode it. afterwards, the sup driver needs to handle the command and write or read the corresponding register
  * - crc8 / crc16
+ * - use a timeout while waiting for usart to be available (systick maybe?)
  * - define error codes in header files
  * - put usart in sup -> basically not needed in the main loop
+ * - sup receive function: send and receive can return the same errorcodes for different errors -> generate a unique error table (defines)
  * - possibility: sw interrupt when separator has been received -> no check required in main loop
  * - use a ringbuffer as the send buffer for sup packets. the buffer can be appended with a new command during the transmission of another one. this way the usart does not havt to wait for the calculation of the packets
  */
@@ -52,7 +54,6 @@ int main(void)
 {
 	RingBuff_t* RingBuffer_ptr;
 	uint8_t au8rawData[SUP_BUFFER_SIZE];
-	uint8_t au8data[SUP_MAX_LENGTH];
 	uint16_t u16rawDataLength,u16dataLength,u16temp;
 	int8_t s8retVal;
 	uint8_t u8temp;
@@ -113,98 +114,8 @@ int main(void)
 		if(RingBuffer_CountData(RingBuffer_ptr,0x7E))
 		{
 			u16rawDataLength = RingBuffer_RemoveUntilDelimiter(RingBuffer_ptr,au8rawData,SUP_BUFFER_SIZE,0x7E);
-			s8retVal = sup_receive(au8data,&u16dataLength,au8rawData,u16rawDataLength);
-			if(s8retVal == 0)
-			{
-				switch(au8data[0])
-				{
-				case WRITE_SYS:
+			s8retVal = sup_receive(au8rawData,u16rawDataLength);
 
-				break;
-
-				case WRITE_SYS_REPLY:
-
-				break;
-
-				case READ_SYS:
-
-				break;
-
-				case READ_SYS_REPLY:
-
-				break;
-
-				case WRITE_DATA:
-
-				break;
-
-				case WRITE_DATA_REPLY:
-
-				break;
-
-				case READ_DATA:
-
-				break;
-
-				case READ_DATA_REPLY:
-
-				break;
-
-				case SETUP_JOB:
-
-				break;
-
-				case SETUP_JOB_REPLY:
-
-				break;
-
-				case CHANGE_JOB:
-
-				break;
-
-				case CHANGE_JOB_REPLY:
-
-				break;
-
-				case DELETE_JOB:
-
-				break;
-
-				case DELETE_JOB_REPLY:
-
-				break;
-
-				case GET_JOB:
-
-				break;
-
-				case GET_JOB_REPLY:
-
-				break;
-
-				case START_JOB:
-
-				break;
-
-				case START_JOB_REPLY:
-
-				break;
-
-				case STOP_JOB:
-
-				break;
-
-				case STOP_JOB_REPLY:
-
-				break;
-
-				case JOB_DATA:
-
-				break;
-				}
-				while(sup_send_isbusy());
-				sup_send(au8data,u16dataLength);
-			}
 		}
 //		GPIOC->ODR ^= GPIO_ODR_ODR13;
 //		wait_1ms(100);
