@@ -4,7 +4,7 @@
 #include "usart.h"
 
 
-static uint8_t au8sendBuffer[SUP_BUFFER_SIZE];
+static uint8_t au8sendBuffer[SUP_LL_BUFFER_SIZE];
 
 static uint8_t sup_ll_crc8(uint8_t* u8data_ptr, uint16_t u16length);
 static uint16_t sup_ll_crc16(uint8_t* u8data_ptr, uint16_t u16length);
@@ -69,7 +69,7 @@ static int8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_pt
 {
     uint16_t u16crc;
 
-	if((u16rawLength<SUP_MIN_LENGTH) || (u16rawLength > SUP_MAX_LENGTH))
+	if((u16rawLength<SUP_LL_MIN_LENGTH) || (u16rawLength > SUP_LL_MAX_LENGTH))
     {
     	return -1;
     }
@@ -222,7 +222,7 @@ int8_t sup_ll_send(uint8_t* u8dataToSend_ptr, uint16_t u16length)
 {
     uint16_t u16stuffedLength,u16packetLength;
     int8_t s8retVal;
-    uint8_t au8packet[SUP_BUFFER_SIZE];
+    uint8_t au8packet[SUP_LL_BUFFER_SIZE];
     
     s8retVal = sup_ll_package(au8packet,&u16packetLength,u8dataToSend_ptr,u16length);
     if(s8retVal)
@@ -244,14 +244,14 @@ int8_t sup_ll_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t*
     int8_t s8retVal;
     uint16_t u16packetLength;
     
-    uint8_t au8packet[SUP_BUFFER_SIZE];
+    uint8_t au8packet[SUP_LL_BUFFER_SIZE];
     
     s8retVal = sup_ll_unstuff(au8packet,&u16packetLength,u8rawData_ptr,u16rawDataLength);
     if(s8retVal)
     {
     	return -1;
     }
-    if((u16packetLength < SUP_MIN_LENGTH+2) || (u16packetLength > SUP_MAX_LENGTH+2))
+    if((u16packetLength < SUP_LL_MIN_LENGTH+2) || (u16packetLength > SUP_LL_MAX_LENGTH+2))
     {
         return -2;
     }

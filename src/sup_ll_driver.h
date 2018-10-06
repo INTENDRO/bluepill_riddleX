@@ -2,12 +2,9 @@
 #ifndef SUP_LL_DRIVER
 #define SUP_LL_DRIVER
 
-#define SUP_BUFFER_SIZE 312
-#define SUP_MAX_LENGTH 256
-#define SUP_MIN_LENGTH 1
-
-
-
+#define SUP_LL_BUFFER_SIZE 312
+#define SUP_LL_MAX_LENGTH 256
+#define SUP_LL_MIN_LENGTH 1
 
 
 

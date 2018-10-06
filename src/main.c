@@ -32,7 +32,9 @@ SOFTWARE.
  * - get packet and give it to the sup driver. this one will then use the low level driver to decode it. afterwards, the sup driver needs to handle the command and write or read the corresponding register
  * - crc8 / crc16
  * - define error codes in header files
- * - possibility: sw interrupt when separator has been received -> no check required in main loop!
+ * - put usart in sup -> basically not needed in the main loop
+ * - possibility: sw interrupt when separator has been received -> no check required in main loop
+ * - use a ringbuffer as the send buffer for sup packets. the buffer can be appended with a new command during the transmission of another one. this way the usart does not havt to wait for the calculation of the packets
  */
 
 /* Includes */
@@ -41,7 +43,7 @@ SOFTWARE.
 #include "ringbuffer.h"
 #include "utils.h"
 #include "usart.h"
-#include "sup_ll_driver.h"
+//#include "sup_ll_driver.h"
 #include "sup.h"
 #include "test_module.h"
 
@@ -111,7 +113,7 @@ int main(void)
 		if(RingBuffer_CountData(RingBuffer_ptr,0x7E))
 		{
 			u16rawDataLength = RingBuffer_RemoveUntilDelimiter(RingBuffer_ptr,au8rawData,SUP_BUFFER_SIZE,0x7E);
-			s8retVal = sup_ll_receive(au8data,&u16dataLength,au8rawData,u16rawDataLength);
+			s8retVal = sup_receive(au8data,&u16dataLength,au8rawData,u16rawDataLength);
 			if(s8retVal == 0)
 			{
 				switch(au8data[0])
@@ -200,8 +202,8 @@ int main(void)
 
 				break;
 				}
-				while(sup_ll_send_isbusy());
-				sup_ll_send(au8data,u16dataLength);
+				while(sup_send_isbusy());
+				sup_send(au8data,u16dataLength);
 			}
 		}
 //		GPIOC->ODR ^= GPIO_ODR_ODR13;

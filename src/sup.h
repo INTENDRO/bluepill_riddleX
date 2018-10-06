@@ -8,6 +8,7 @@
 #ifndef SUP_H_
 #define SUP_H_
 
+#include "sup_ll_driver.h"
 
 typedef enum
 {
@@ -66,10 +67,17 @@ typedef struct
 #define STOP_JOB_REPLY		0x13
 #define JOB_DATA			0x14
 
+#define SUP_BUFFER_SIZE 	SUP_LL_BUFFER_SIZE
+#define SUP_MAX_LENGTH 		SUP_LL_MAX_LENGTH
+#define SUP_MIN_LENGTH 		SUP_LL_MIN_LENGTH
+
 
 int8_t sup_init_module(uint8_t module_nr,sup_module_t* module);
 int8_t sup_get_properties(uint8_t* pu8properties, uint8_t u8module_nr, uint8_t u8reg_nr);
 int8_t sup_get_type(uint8_t* pu8type, uint8_t u8module_nr, uint8_t u8reg_nr);
+int8_t sup_send(uint8_t* u8dataToSend_ptr, uint16_t u16length);
+uint8_t sup_send_isbusy(void);
+int8_t sup_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawDataLength);
 
 
 #endif /* SUP_H_ */
