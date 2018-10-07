@@ -43,7 +43,7 @@ SOFTWARE.
 #include "stm32f10x.h"
 #include "ringbuffer.h"
 #include "utils.h"
-#include "usart.h"
+//#include "usart.h"
 #include "sup.h"
 #include "test_module.h"
 
@@ -72,16 +72,14 @@ int main(void)
 	u8temp = SysTick_Config(SystemCoreClock/1000); //set the systick to 1ms
 
 	RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
-
 	GPIOC->CRH = GPIO_CRH_MODE13_0;
 	GPIOC->ODR |= GPIO_ODR_ODR13;
 
-	usartInit(115200);
+	sup_init(115200);
 
-	wait_1ms(10);
-	usartClearFlagsAndBuffer();
 	wait_1ms(100);
-	RingBuffer_ptr = usartGetRingBuffPointer();
+//	RingBuffer_ptr = usartGetRingBuffPointer();
+	RingBuffer_ptr = sup_get_ringbuffer_ptr();
 
 	init_module();
 	s8retVal = sup_get_properties(&u8temp,0,0);

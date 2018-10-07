@@ -8,9 +8,20 @@
 #include "stm32f10x.h"
 #include "sup.h"
 #include "sup_ll_driver.h"
+#include "ringbuffer.h"
 
 static sup_module_t* module_array[SUP_MAX_MODULE_COUNT] = {0};
 
+
+int8_t sup_init(uint32_t u32baudrate)
+{
+	return sup_ll_init(u32baudrate);
+}
+
+RingBuff_t* sup_get_ringbuffer_ptr(void)
+{
+	return sup_ll_get_ringbuffer_ptr();
+}
 
 int8_t sup_init_module(uint8_t module_nr,sup_module_t* module)
 {

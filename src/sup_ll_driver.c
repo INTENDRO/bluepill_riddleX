@@ -1,7 +1,9 @@
 #include <stm32f10x.h>
 #include <string.h>
+#include "utils.h"
 #include "sup_ll_driver.h"
 #include "usart.h"
+#include "ringbuffer.h"
 
 
 static uint8_t au8sendBuffer[SUP_LL_BUFFER_SIZE];
@@ -16,6 +18,7 @@ static int8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_pt
 static int8_t sup_ll_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_ptr, uint8_t* u8data_ptr, uint16_t u16dataLength);
 static int8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8stuffed_ptr, uint16_t u16stuffedLength);
 static int8_t sup_ll_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8package_ptr, uint16_t u16packageLength);
+
 
 #ifdef SUP_LL_CRC8
 static uint8_t sup_ll_crc8(uint8_t* u8data_ptr, uint16_t u16length)
@@ -249,7 +252,18 @@ static int8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, u
     return 0;
 }
 
+int8_t sup_ll_init(uint32_t u32baudrate)
+{
+	usartInit(u32baudrate);
+	wait_1ms(1);
+	usartClearFlagsAndBuffer();
+	return 0;
+}
 
+RingBuff_t* sup_ll_get_ringbuffer_ptr(void)
+{
+	return usartGetRingBuffPointer();
+}
 
 int8_t sup_ll_send(uint8_t* u8dataToSend_ptr, uint16_t u16length)
 {
