@@ -29,7 +29,6 @@ SOFTWARE.
 
 /*
  * TO DO:
- * - use a timeout while waiting for usart to be available (systick maybe?)
  * - define error codes in header files
  * - sup receive function: send and receive can return the same errorcodes for different errors -> generate a unique error table (defines)
  * - possibility: sw interrupt when separator has been received -> no check required in main loop
@@ -64,9 +63,7 @@ int main(void)
 	GPIOC->ODR |= GPIO_ODR_ODR13;
 
 	sup_init(115200);
-
 	wait_1ms(100);
-//	RingBuffer_ptr = usartGetRingBuffPointer();
 	RingBuffer_ptr = sup_get_ringbuffer_ptr();
 
 	init_module();
@@ -102,29 +99,29 @@ int main(void)
 	__enable_irq();
 
 
-	while(1)
-	{
-		u32sys_tick_old = get_sys_tick();
-		while(1)
-		{
-			u32temp = get_sys_tick();
-			if(u32temp < u32sys_tick_old)
-			{
-				if((0xFFFFFFFF - u32sys_tick_old - u32temp + 1) >= 500)
-				{
-					break;
-				}
-			}
-			else
-			{
-				if((u32temp - u32sys_tick_old) >= 500)
-				{
-					break;
-				}
-			}
-		}
-		GPIOC->ODR ^= GPIO_ODR_ODR13;
-	}
+//	while(1)
+//	{
+//		u32sys_tick_old = get_sys_tick();
+//		while(1)
+//		{
+//			u32temp = get_sys_tick();
+//			if(u32temp < u32sys_tick_old)
+//			{
+//				if((0xFFFFFFFF - u32sys_tick_old - u32temp + 1) >= 500)
+//				{
+//					break;
+//				}
+//			}
+//			else
+//			{
+//				if((u32temp - u32sys_tick_old) >= 500)
+//				{
+//					break;
+//				}
+//			}
+//		}
+//		GPIOC->ODR ^= GPIO_ODR_ODR13;
+//	}
 
 
 	while(1)

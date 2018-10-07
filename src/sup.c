@@ -6,6 +6,7 @@
  */
 
 #include "stm32f10x.h"
+#include "utils.h"
 #include "sup.h"
 #include "sup_ll_driver.h"
 #include "ringbuffer.h"
@@ -89,6 +90,7 @@ int8_t sup_receive(uint8_t* u8rawData_ptr, uint16_t u16rawDataLength)
 	int8_t s8retVal;
 	uint8_t au8data[SUP_MAX_LENGTH];
 	uint16_t u16dataLength;
+	uint32_t u32timeout_hold,u32temp;
 
 
 	s8retVal = sup_ll_receive(au8data,&u16dataLength,u8rawData_ptr,u16rawDataLength);
@@ -181,7 +183,28 @@ int8_t sup_receive(uint8_t* u8rawData_ptr, uint16_t u16rawDataLength)
 
 		break;
 		}
-		while(sup_send_isbusy());
+
+		u32timeout_hold = get_sys_tick();
+		while(sup_send_isbusy())
+		{
+			u32temp = get_sys_tick();
+			if(u32temp < u32timeout_hold)
+			{
+				if((0xFFFFFFFF - u32timeout_hold - u32temp + 1) >= 50)
+				{
+					//UART FROZEN! NEEDS TO BE RESET!!!!
+					return -1;
+				}
+			}
+			else
+			{
+				if((u32temp - u32timeout_hold) >= 50)
+				{
+					//UART FROZEN! NEEDS TO BE RESET!!!!
+					return -1;
+				}
+			}
+		}
 		s8retVal = sup_send(au8data,u16dataLength);
 		return s8retVal;
 	}
