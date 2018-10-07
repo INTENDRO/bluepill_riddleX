@@ -1,6 +1,18 @@
 #include <stm32f10x.h>
 #include "utils.h"
 
+static uint32_t u32sysTickCounter = 0;
+
+void SysTick_Handler(void)
+{
+	u32sysTickCounter++;
+}
+
+uint32_t get_sys_tick(void)
+{
+	return u32sysTickCounter;
+}
+
 void wait_1ms(uint16_t u16Factor) // using timer 4
 {
 	uint16_t i;

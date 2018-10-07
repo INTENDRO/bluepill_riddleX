@@ -31,8 +31,6 @@ SOFTWARE.
  * TO DO:
  * - use a timeout while waiting for usart to be available (systick maybe?)
  * - define error codes in header files
- * - use the crc hw
- * - put usart init in sup -> usart should not be accessed in the main file
  * - sup receive function: send and receive can return the same errorcodes for different errors -> generate a unique error table (defines)
  * - possibility: sw interrupt when separator has been received -> no check required in main loop
  * - use a ringbuffer as the send buffer for sup packets. the buffer can be appended with a new command during the transmission of another one. this way the usart does not havt to wait for the calculation of the packets
@@ -43,21 +41,11 @@ SOFTWARE.
 #include "stm32f10x.h"
 #include "ringbuffer.h"
 #include "utils.h"
-//#include "usart.h"
 #include "sup.h"
 #include "test_module.h"
 
-uint32_t u32sysTickCounter = 0;
 
-void SysTick_Handler(void)
-{
-	u32sysTickCounter++;
-	if(u32sysTickCounter == 500)
-	{
-		u32sysTickCounter = 0;
-		GPIOC->ODR ^= GPIO_ODR_ODR13;
-	}
-}
+
 
 int main(void)
 {
@@ -66,7 +54,7 @@ int main(void)
 	uint16_t u16rawDataLength,u16dataLength,u16temp;
 	int8_t s8retVal;
 	uint8_t u8temp;
-
+	uint32_t u32temp,u32sys_tick_old;
 
 	SystemInit();
 	u8temp = SysTick_Config(SystemCoreClock/1000); //set the systick to 1ms
@@ -116,12 +104,39 @@ int main(void)
 
 	while(1)
 	{
+		u32sys_tick_old = get_sys_tick();
+		while(1)
+		{
+			u32temp = get_sys_tick();
+			if(u32temp < u32sys_tick_old)
+			{
+				if((0xFFFFFFFF - u32sys_tick_old - u32temp + 1) >= 500)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if((u32temp - u32sys_tick_old) >= 500)
+				{
+					break;
+				}
+			}
+		}
+		GPIOC->ODR ^= GPIO_ODR_ODR13;
+	}
+
+
+	while(1)
+	{
 		if(RingBuffer_CountData(RingBuffer_ptr,0x7E))
 		{
 			u16rawDataLength = RingBuffer_RemoveUntilDelimiter(RingBuffer_ptr,au8rawData,SUP_BUFFER_SIZE,0x7E);
 			s8retVal = sup_receive(au8rawData,u16rawDataLength);
 
 		}
+
+
 //		GPIOC->ODR ^= GPIO_ODR_ODR13;
 //		wait_1ms(100);
 	}
