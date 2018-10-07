@@ -12,10 +12,10 @@
 //#define SUP_LL_CRC8
 
 
-int8_t sup_ll_init(uint32_t u32baudrate);
+uint8_t sup_ll_init(uint32_t u32baudrate);
 RingBuff_t* sup_ll_get_ringbuffer_ptr(void);
-int8_t sup_ll_send(uint8_t* u8dataToSend_ptr, uint16_t u16length);
-int8_t sup_ll_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawDataLength);
+uint8_t sup_ll_send(uint8_t* u8dataToSend_ptr, uint16_t u16length);
+uint8_t sup_ll_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawDataLength);
 uint8_t sup_ll_send_isbusy(void);
 
 #endif

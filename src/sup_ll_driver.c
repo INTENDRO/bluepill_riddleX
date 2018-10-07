@@ -2,6 +2,7 @@
 #include <string.h>
 #include "utils.h"
 #include "sup_ll_driver.h"
+#include "sup_error.h"
 #include "usart.h"
 #include "ringbuffer.h"
 
@@ -14,10 +15,10 @@ static uint8_t sup_ll_crc8(uint8_t* u8data_ptr, uint16_t u16length);
 static uint16_t sup_ll_crc16(uint8_t* u8data_ptr, uint16_t u16length);
 #endif
 
-static int8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawLength);
-static int8_t sup_ll_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_ptr, uint8_t* u8data_ptr, uint16_t u16dataLength);
-static int8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8stuffed_ptr, uint16_t u16stuffedLength);
-static int8_t sup_ll_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8package_ptr, uint16_t u16packageLength);
+static uint8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawLength);
+static uint8_t sup_ll_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_ptr, uint8_t* u8data_ptr, uint16_t u16dataLength);
+static uint8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8stuffed_ptr, uint16_t u16stuffedLength);
+static uint8_t sup_ll_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8package_ptr, uint16_t u16packageLength);
 
 
 #ifdef SUP_LL_CRC8
@@ -75,7 +76,7 @@ static uint16_t sup_ll_crc16(uint8_t* u8data_ptr, uint16_t u16length)
 #endif
 
 
-static int8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawLength)
+static uint8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawLength)
 {
 #ifdef SUP_LL_CRC8
 	uint8_t u8crc;
@@ -85,7 +86,7 @@ static int8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_pt
 
 	if((u16rawLength<SUP_LL_MIN_LENGTH) || (u16rawLength > SUP_LL_MAX_LENGTH))
     {
-    	return -1;
+    	return SUP_ERROR_DATA_LENGTH;
     }
 
 	*u8packet_ptr = u16rawLength-1;
@@ -101,21 +102,21 @@ static int8_t sup_ll_package(uint8_t* u8packet_ptr, uint16_t* u16packetLength_pt
 	*(u8packet_ptr+u16rawLength+2) = (uint8_t)(u16crc>>8);
 	*u16packetLength_ptr = u16rawLength + 3;
 #endif
-    return 0;
+    return SUP_SUCCESS;
 }
 
 
-static int8_t sup_ll_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8package_ptr, uint16_t u16packageLength)
+static uint8_t sup_ll_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8package_ptr, uint16_t u16packageLength)
 {
 #ifdef SUP_LL_CRC8
 	if(sup_ll_crc8(u8package_ptr,u16packageLength))
     {
-        return -1;
+        return SUP_ERROR_CRC;
     }
 
 	if((((uint16_t)u8package_ptr[0])+3) != u16packageLength)
 	{
-		return -2;
+		return SUP_ERROR_DATA_LENGTH;
 	}
 
 	*u16dataLength_ptr = u16packageLength-2;
@@ -123,23 +124,23 @@ static int8_t sup_ll_unpackage(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr,
 #else
 	if(sup_ll_crc16(u8package_ptr,u16packageLength))
 	{
-		return -1;
+		return SUP_ERROR_CRC;
 	}
 
 	if((((uint16_t)u8package_ptr[0])+4) != u16packageLength)
 	{
-		return -2;
+		return SUP_ERROR_DATA_LENGTH;
 	}
 
 	*u16dataLength_ptr = u16packageLength-3;
 	memcpy(u8data_ptr,u8package_ptr+1,u16packageLength-3);
 #endif
     
-    return 0;
+    return SUP_SUCCESS;
 }
 
 
-static int8_t sup_ll_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_ptr, uint8_t* u8data_ptr, uint16_t u16dataLength)
+static uint8_t sup_ll_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_ptr, uint8_t* u8data_ptr, uint16_t u16dataLength)
 {
     uint16_t u16dataBitCounter,u16destBitCounter,u16dataMaxBit,u16consecutiveOnes;
     
@@ -183,11 +184,11 @@ static int8_t sup_ll_stuff(uint8_t* u8stuffed_ptr, uint16_t* u16stuffedLength_pt
     
     u8stuffed_ptr[u16destBitCounter/8+1] = 0x7E; //delimiter
     *u16stuffedLength_ptr = u16destBitCounter/8+2; //stuffed length
-    return 0;
+    return SUP_SUCCESS;
 }
 
 
-static int8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8stuffed_ptr, uint16_t u16stuffedLength)
+static uint8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8stuffed_ptr, uint16_t u16stuffedLength)
 {
     uint16_t u16consecutiveOnes, u16dataBitCounter, u16stuffedBitCounter, u16stuffedBitMax, u16stuffBitCount;
     
@@ -198,7 +199,7 @@ static int8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, u
         
         if(u16stuffedLength == 0)
         {
-            return -2;
+            return SUP_ERROR_DATA_LENGTH;
         }
     }
     
@@ -208,7 +209,7 @@ static int8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, u
         
         if(u16stuffedLength == 0)
         {
-            return -2;
+            return SUP_ERROR_DATA_LENGTH;
         }
     }
     
@@ -234,7 +235,7 @@ static int8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, u
                 if(u8stuffed_ptr[u16stuffedBitCounter/8] & (0x80 >> (u16stuffedBitCounter%8)))
                 {
                     //error
-                    return -1;
+                    return SUP_ERROR_STUFFING;
                 }
                 u16stuffedBitCounter++;
                 u16stuffBitCount++;
@@ -249,15 +250,15 @@ static int8_t sup_ll_unstuff(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, u
         }
     }
     *u16dataLength_ptr = u16stuffedLength - ((u16stuffBitCount+7)/8);
-    return 0;
+    return SUP_SUCCESS;
 }
 
-int8_t sup_ll_init(uint32_t u32baudrate)
+uint8_t sup_ll_init(uint32_t u32baudrate)
 {
 	usartInit(u32baudrate);
 	wait_1ms(1);
 	usartClearFlagsAndBuffer();
-	return 0;
+	return SUP_SUCCESS;
 }
 
 RingBuff_t* sup_ll_get_ringbuffer_ptr(void)
@@ -265,50 +266,50 @@ RingBuff_t* sup_ll_get_ringbuffer_ptr(void)
 	return usartGetRingBuffPointer();
 }
 
-int8_t sup_ll_send(uint8_t* u8dataToSend_ptr, uint16_t u16length)
+uint8_t sup_ll_send(uint8_t* u8dataToSend_ptr, uint16_t u16length)
 {
     uint16_t u16stuffedLength,u16packetLength;
-    int8_t s8retVal;
+    uint8_t u8retVal;
     uint8_t au8packet[SUP_LL_BUFFER_SIZE];
     
-    s8retVal = sup_ll_package(au8packet,&u16packetLength,u8dataToSend_ptr,u16length);
-    if(s8retVal)
+    u8retVal = sup_ll_package(au8packet,&u16packetLength,u8dataToSend_ptr,u16length);
+    if(u8retVal)
     {
-    	return -1;
+    	return SUP_ERROR_PACKET;
     }
-    s8retVal = sup_ll_stuff(au8sendBuffer,&u16stuffedLength,au8packet,u16packetLength);
-    if(s8retVal)
+    u8retVal = sup_ll_stuff(au8sendBuffer,&u16stuffedLength,au8packet,u16packetLength);
+    if(u8retVal)
 	{
-		return -2;
+		return SUP_ERROR_STUFFING;
 	}
     usartDMASend(au8sendBuffer,u16stuffedLength);
-    return 0;
+    return SUP_SUCCESS;
 }
 
 
-int8_t sup_ll_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawDataLength)
+uint8_t sup_ll_receive(uint8_t* u8data_ptr, uint16_t* u16dataLength_ptr, uint8_t* u8rawData_ptr, uint16_t u16rawDataLength)
 {
-    int8_t s8retVal;
+    uint8_t u8retVal;
     uint16_t u16packetLength;
     
     uint8_t au8packet[SUP_LL_BUFFER_SIZE];
     
-    s8retVal = sup_ll_unstuff(au8packet,&u16packetLength,u8rawData_ptr,u16rawDataLength);
-    if(s8retVal)
+    u8retVal = sup_ll_unstuff(au8packet,&u16packetLength,u8rawData_ptr,u16rawDataLength);
+    if(u8retVal)
     {
-    	return -1;
+    	return SUP_ERROR_STUFFING;
     }
     if((u16packetLength < SUP_LL_MIN_LENGTH+2) || (u16packetLength > SUP_LL_MAX_LENGTH+2))
     {
-        return -2;
+        return SUP_ERROR_DATA_LENGTH;
     }
     
-    s8retVal = sup_ll_unpackage(u8data_ptr,u16dataLength_ptr,au8packet,u16packetLength);
-    if(s8retVal)
+    u8retVal = sup_ll_unpackage(u8data_ptr,u16dataLength_ptr,au8packet,u16packetLength);
+    if(u8retVal)
     {
-        return -3;
+        return SUP_ERROR_PACKET;
     }
-    return 0;
+    return SUP_SUCCESS;
 }
 
 uint8_t sup_ll_send_isbusy(void)

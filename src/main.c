@@ -29,8 +29,6 @@ SOFTWARE.
 
 /*
  * TO DO:
- * - define error codes in header files
- * - sup receive function: send and receive can return the same errorcodes for different errors -> generate a unique error table (defines)
  * - possibility: sw interrupt when separator has been received -> no check required in main loop
  * - use a ringbuffer as the send buffer for sup packets. the buffer can be appended with a new command during the transmission of another one. this way the usart does not havt to wait for the calculation of the packets
  */
